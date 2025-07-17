@@ -5,7 +5,7 @@ st.set_page_config(
     page_title="Sustain 4.0 - BioEngine",
     page_icon="🌿",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Sistema de autenticação simples
@@ -27,15 +27,22 @@ def authenticate_user(username, password):
 
 def login_page():
     """Exibe a página de login"""
-    st.title("🔐 Acesso ao Sustain 4.0 - BioEngine")
-    st.markdown("### Sistema de Análise de Sustentabilidade Ambiental")
-    
+    # Centralizar imagem e título juntos no centro da página usando columns
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+      st.markdown(
+        "<h1 style='text-align: center; font-size: 2.5em; font-weight: 700;'>Sustain4.0 BioEngine</h1>",
+        unsafe_allow_html=True
+      )
+
     # Centralizar o formulário de login
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.markdown("---")
-        st.subheader("🚪 Faça seu Login")
+        st.markdown(
+            "<h3 style='text-align: center;'>Faça seu Login</h3>",
+            unsafe_allow_html=True
+        )
         
         # Formulário de login
         with st.form("login_form"):
@@ -128,6 +135,11 @@ import pandas as pd
 if not check_authentication():
     login_page()
     st.stop()  # Para a execução aqui se não estiver autenticado
+
+
+
+
+
 
 # Página Principal - Boas-vindas
 st.title("🌿 Sustain 4.0 - BioEngine")
