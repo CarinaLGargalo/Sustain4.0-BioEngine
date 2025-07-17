@@ -7,6 +7,11 @@ st.set_page_config(
     layout="wide"
 )
 
+# Verificação de autenticação
+if not st.session_state.get('authenticated', False):
+    st.error("🔐 Acesso negado! Por favor, faça login na página principal.")
+    st.stop()
+
 # Inicializar session state (mesmo sistema da página principal)
 def init_session_state():
     if 'user_name' not in st.session_state:
@@ -25,6 +30,10 @@ def init_session_state():
         st.session_state.theme = "Claro"
 
 init_session_state()
+
+# Informações do usuário na sidebar
+st.sidebar.success(f"👋 **{st.session_state.get('username', 'Usuário')}**")
+st.sidebar.markdown("---")
 
 st.header("🏠 Bem-vindo ao Sustain 4.0 - BioEngine!")
 
