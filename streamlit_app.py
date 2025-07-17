@@ -171,44 +171,41 @@ st.sidebar.info(
     """
 )
 
-# Conteúdo principal da página de boas-vindas
-col1, col2, col3 = st.columns([1, 2, 1])
 
-with col2:
-    st.markdown("""
-    ## 🎯 Bem-vindo ao Sustain 4.0 - BioEngine!
-    
-    Uma plataforma completa para análise e monitoramento de sustentabilidade ambiental, 
-    desenvolvida para pesquisadores, analistas e gestores ambientais.
-    
-    ### 🚀 Funcionalidades Principais:
-    
-    - **🌱 Análise de Biodiversidade**: Avalie a diversidade de espécies em seu projeto
-    - **🌍 Análise de Carbono**: Monitore emissões e sequestro de carbono
-    - **💧 Análise de Água**: Avalie qualidade e disponibilidade hídrica
-    - **🌿 Análise de Solo**: Monitore saúde e qualidade do solo
-    
-    ### 📊 Características:
-    
-    - Interface intuitiva e responsiva
-    - Análises baseadas em Machine Learning
-    - Visualizações interativas
-    - Relatórios personalizáveis
-    - Integração com dados externos
-    """)
-    
-    # Estatísticas simuladas
-    st.markdown("### 📈 Estatísticas da Plataforma")
-    col_stats1, col_stats2, col_stats3, col_stats4 = st.columns(4)
-    
-    with col_stats1:
-        st.metric("Projetos Ativos", "1,234", "12%")
-    with col_stats2:
-        st.metric("Análises Realizadas", "5,678", "8%")
-    with col_stats3:
-        st.metric("Usuários Registrados", "890", "15%")
-    with col_stats4:
-        st.metric("Dados Processados (GB)", "2.3", "23%")
+st.markdown("""
+## 🎯 Bem-vindo ao Sustain 4.0 - BioEngine!
+
+Uma plataforma completa para análise e monitoramento de sustentabilidade ambiental, 
+desenvolvida para pesquisadores, analistas e gestores ambientais.
+
+### 🚀 Funcionalidades Principais:
+
+- **🌱 Análise de Biodiversidade**: Avalie a diversidade de espécies em seu projeto
+- **🌍 Análise de Carbono**: Monitore emissões e sequestro de carbono
+- **💧 Análise de Água**: Avalie qualidade e disponibilidade hídrica
+- **🌿 Análise de Solo**: Monitore saúde e qualidade do solo
+
+### 📊 Características:
+
+- Interface intuitiva e responsiva
+- Análises baseadas em Machine Learning
+- Visualizações interativas
+- Relatórios personalizáveis
+- Integração com dados externos
+""")
+
+# Estatísticas simuladas
+st.markdown("### 📈 Estatísticas da Plataforma")
+col_stats1, col_stats2, col_stats3, col_stats4 = st.columns(4)
+
+with col_stats1:
+    st.metric("Projetos Ativos", "1,234", "12%")
+with col_stats2:
+    st.metric("Análises Realizadas", "5,678", "8%")
+with col_stats3:
+    st.metric("Usuários Registrados", "890", "15%")
+with col_stats4:
+    st.metric("Dados Processados (GB)", "2.3", "23%")
 
 # Seção de resumo global (se houver dados do usuário)
 if st.session_state.get('user_name'):
