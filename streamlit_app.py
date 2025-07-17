@@ -175,9 +175,6 @@ st.sidebar.info(
 col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
-    st.image("https://via.placeholder.com/400x200/2E8B57/FFFFFF?text=Sustain+4.0+BioEngine", 
-             caption="Sustain 4.0 - BioEngine", use_container_width=True)
-    
     st.markdown("""
     ## 🎯 Bem-vindo ao Sustain 4.0 - BioEngine!
     
