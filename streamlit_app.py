@@ -5,3 +5,4 @@ from sklearn.ensemble import RandomForestClassifier
 
 st.title('🌿Sustain 4.0 - BioEngine')
 
+st.set_page_config(layout="wide")
