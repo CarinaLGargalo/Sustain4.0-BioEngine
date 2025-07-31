@@ -4,10 +4,6 @@ cookie:
   name: sustain40_cookie
 credentials:
   usernames:
-    Canutilho:
-      email: audecan@gmail.com
-      name: Augusto DC
-      password: $2b$12$y1AW4XeY0It4sNx0wNAa0OtqEw8edi0JNT0E5Iin6bLTpVPAPIDxS
     admin:
       email: admin@bioengine.com
       name: Administrador
