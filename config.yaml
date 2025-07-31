@@ -8,18 +8,10 @@ credentials:
       email: admin@bioengine.com
       name: Administrador
       password: $2b$12$Oa5Olnt3gVAL47KsCbDCc.m9NqbCMhJTHBgKj/6ms.yepDXMn9lqa
-    analista:
-      email: analista@bioengine.com
-      name: Analista
-      password: $2b$12$JzPZ9/9D5fyTMeoYmWaaCOJ2TE4L8fJSvRlBel8RsQodSluFZaYHm
     demo:
       email: demo@bioengine.com
       name: Demo User
       password: $2b$12$vSQrAF95wa1RK8dnZZWDseeQ148R/1lBmvfUTgRmZdVICCg5SkKXS
-    pesquisador:
-      email: pesquisador@bioengine.com
-      name: Pesquisador
-      password: $2b$12$Zt/3YQuO6iyxBrDcwSVmruGbtyayYVc.7wHMZxAk4V5FVE6jNieqG
 preauthorized:
   emails:
   - admin@bioengine.com
