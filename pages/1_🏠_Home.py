@@ -4,7 +4,8 @@ import streamlit as st
 st.set_page_config(
     page_title="Home - Sustain 4.0",
     page_icon="🏠",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state= "collapsed"
 )
 
 # Verificação de autenticação
@@ -16,14 +17,6 @@ if not st.session_state.get('authenticated', False):
 def init_session_state():
     if 'user_name' not in st.session_state:
         st.session_state.user_name = ""
-    if 'selected_analysis' not in st.session_state:
-        st.session_state.selected_analysis = "Análise de Biodiversidade"
-    if 'data_uploaded' not in st.session_state:
-        st.session_state.data_uploaded = False
-    if 'uploaded_data' not in st.session_state:
-        st.session_state.uploaded_data = None
-    if 'model_params' not in st.session_state:
-        st.session_state.model_params = {'n_estimators': 100, 'max_depth': 10}
     if 'notifications' not in st.session_state:
         st.session_state.notifications = True
     if 'theme' not in st.session_state:
@@ -31,11 +24,16 @@ def init_session_state():
 
 init_session_state()
 
-# Informações do usuário na sidebar
-st.sidebar.success(f"👋 **{st.session_state.get('username', 'Usuário')}**")
-st.sidebar.markdown("---")
-
 st.header("🏠 Bem-vindo ao Sustain 4.0 - BioEngine!")
+
+# Verificar se acabou de fazer login
+if st.session_state.get('login_time'):
+    login_time = st.session_state.login_time
+    import datetime
+    # Se o login foi feito há menos de 30 segundos, mostrar mensagem de boas-vindas
+    if (datetime.datetime.now() - login_time.to_pydatetime()).total_seconds() < 30:
+        st.success(f"🎉 Bem-vindo, **{st.session_state.username}**! Você foi direcionado para a página inicial após o login.")
+        st.balloons()  # Efeito visual de celebração
 
 # Seção de informações do usuário
 col1, col2 = st.columns(2)
@@ -101,9 +99,9 @@ if st.session_state.user_name:
 st.divider()
 st.info("""
 **💡 Próximos Passos:**
-- Vá para a página **Análise** para fazer upload de dados e executar análises
-- Configure suas preferências na página **Configurações**
-- Visualize resultados na página **Dashboard**
+- Configure todas as suas informações pessoais e do projeto nesta página
+- Volte para a página principal para visualizar o resumo geral da plataforma
+- Use o botão de logout na barra lateral quando terminar
 """)
 
 # Seção de resumo global
@@ -124,13 +122,11 @@ with col_global1:
         st.warning("📋 **Projeto:** Não configurado")
 
 with col_global2:
-    if st.session_state.get('selected_analysis'):
-        st.info(f"🔬 **Análise Ativa:** {st.session_state.selected_analysis}")
+    if st.session_state.get('project_location'):
+        st.info(f"� **Localização:** {st.session_state.project_location}")
     
-    if st.session_state.data_uploaded:
-        st.success("📊 **Dados:** Carregados")
-    else:
-        st.warning("📊 **Dados:** Não carregados")
+    if st.session_state.get('user_role'):
+        st.info(f"👨‍� **Função:** {st.session_state.user_role}")
 
 with col_global3:
     if st.session_state.get('theme'):
