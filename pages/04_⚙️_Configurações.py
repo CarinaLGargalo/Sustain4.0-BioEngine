@@ -1,4 +1,14 @@
 import streamlit as st
+
+# Configuração da página (DEVE ser o primeiro comando do Streamlit)
+st.set_page_config(
+    page_title="Configurações - Sustain 4.0",
+    page_icon="⚙️",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Importar outras bibliotecas depois da configuração da página
 import yaml
 from yaml.loader import SafeLoader
 import pandas as pd
@@ -9,39 +19,15 @@ import sys
 
 # Adicionar diretório pai ao path para importar funções
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from streamlit_app import save_user_data
-
-# Configuração da página
-st.set_page_config(
-    page_title="Configurações - Sustain 4.0",
-    page_icon="⚙️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+from utils import save_user_data
 
 # Verificação de autenticação
 if not st.session_state.get('authenticated', False):
     st.info("🔐Por favor, faça login na página principal.")
     st.stop()
 
-# Função para carregar configuração
-@st.cache_data
-def load_config():
-    """Carrega a configuração do arquivo YAML"""
-    try:
-        with open('config.yaml') as file:
-            config = yaml.load(file, Loader=SafeLoader)
-        return config
-    except FileNotFoundError:
-        st.error("Arquivo de configuração não encontrado.")
-        return {}
-
-# Função para salvar configuração
-def save_config(config):
-    """Salva a configuração no arquivo YAML"""
-    with open('config.yaml', 'w') as file:
-        yaml.dump(config, file, default_flow_style=False)
-    st.success("Configurações salvas com sucesso!")
+# Importar funções adicionais
+from utils import load_config, save_config
 
 st.header("⚙️ Configurações")
 
