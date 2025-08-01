@@ -186,18 +186,9 @@ if not check_authentication():
     st.stop()  # Para a execução aqui se não estiver autenticado
 
 
-# Inicializar session state (mesmo sistema da página principal)
-def init_session_state():
-    if 'user_name' not in st.session_state:
-        st.session_state.user_name = ""
-    if 'notifications' not in st.session_state:
-        st.session_state.notifications = True
-    if 'theme' not in st.session_state:
-        st.session_state.theme = "Claro"
-
-init_session_state()
-
-st.header("🏠 Bem-vindo ao Sustain 4.0 - BioEngine!")
+# Conteúdo principal da aplicação
+st.title("🌿 Sustain 4.0 - BioEngine")
+st.header(f"Bem-vindo, {st.session_state.get('user_name', '')}!")
 
 # Verificar se acabou de fazer login
 if st.session_state.get('login_time'):

@@ -2,8 +2,8 @@ import streamlit as st
 
 # Configuração da página
 st.set_page_config(
-    page_title="Home - Sustain 4.0",
-    page_icon="🏠",
+    page_title="Configurações - Sustain 4.0",
+    page_icon="⚙️",
     layout="wide",
     initial_sidebar_state= "collapsed"
 )
@@ -24,10 +24,8 @@ def init_session_state():
 
 init_session_state()
 
-st.header("🏠 Bem-vindo ao Sustain 4.0 - BioEngine!")
+st.header("⚙️ Configurações do Sustain 4.0 - BioEngine")
 
 # Verificar se acabou de fazer login
 if st.session_state.get('login_time'):
     st.balloons()  # Efeito visual de celebração
-
-
