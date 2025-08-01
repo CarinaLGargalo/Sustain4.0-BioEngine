@@ -189,8 +189,8 @@ if not check_authentication():
 
 
 # Conteúdo principal da aplicação
-st.title("🌿 Sustain 4.0 - BioEngine")
-st.header(f"Bem-vindo, {st.session_state.get('user_name', '')}!")
+
+st.title(f"🌿 Bem-vindo, {st.session_state.get('user_name', '')}!")
 
 # Verificar se acabou de fazer login (apenas uma vez)
 current_time = pd.Timestamp.now()
