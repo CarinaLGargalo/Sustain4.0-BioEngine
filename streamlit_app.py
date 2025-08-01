@@ -100,6 +100,7 @@ def login_page():
             st.session_state.username = st.session_state["username"]
             st.session_state.user_name = st.session_state["name"]
             st.session_state.login_time = pd.Timestamp.now()
+            st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
             st.success(f'✅ Bem-vindo {st.session_state["name"]}!')
             import time
             time.sleep(1)
@@ -112,6 +113,7 @@ def login_page():
             st.session_state.username = "demo"
             st.session_state.user_name = "Demo User"
             st.session_state.login_time = pd.Timestamp.now()
+            st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
     with tab2:
@@ -191,8 +193,17 @@ st.title("🌿 Sustain 4.0 - BioEngine")
 st.header(f"Bem-vindo, {st.session_state.get('user_name', '')}!")
 
 # Verificar se acabou de fazer login (apenas uma vez)
-if st.session_state.get('login_time') and not st.session_state.get('balloons_shown', False):
+current_time = pd.Timestamp.now()
+login_time = st.session_state.get('login_time')
+
+# Apenas mostrar os balões se:
+# 1. O usuário fez login recentemente (nos últimos 3 segundos)
+# 2. Ainda não mostramos os balões
+if (login_time and 
+    (current_time - login_time).total_seconds() < 3 and 
+    not st.session_state.get('balloons_shown', False)):
     st.balloons()  # Efeito visual de celebração
+    # Marcamos que os balões foram mostrados
     st.session_state.balloons_shown = True
 
 # Criar layout com duas colunas principais
