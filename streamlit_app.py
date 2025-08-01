@@ -61,6 +61,8 @@ def init_session_state():
         st.session_state.notifications = True
     if 'theme' not in st.session_state:
         st.session_state.theme = "Claro"
+    if 'user_projects' not in st.session_state:
+        st.session_state.user_projects = {}  # Dicionário para armazenar projetos por username
 
 init_session_state()
 
@@ -188,6 +190,85 @@ if not check_authentication():
 st.title("🌿 Sustain 4.0 - BioEngine")
 st.header(f"Bem-vindo, {st.session_state.get('user_name', '')}!")
 
-# Verificar se acabou de fazer login
-if st.session_state.get('login_time'):
+# Verificar se acabou de fazer login (apenas uma vez)
+if st.session_state.get('login_time') and not st.session_state.get('balloons_shown', False):
     st.balloons()  # Efeito visual de celebração
+    st.session_state.balloons_shown = True
+
+# Criar layout com duas colunas principais
+main_col1, main_col2 = st.columns([2, 1], gap="large")
+
+with main_col1:
+    # Inicializar estados para criação de projeto
+    if 'show_project_form' not in st.session_state:
+        st.session_state.show_project_form = False
+    
+    # Botão para criar novo projeto
+    if st.button("📁 Criar Novo Projeto", type="primary"):
+        st.session_state.show_project_form = True
+
+with main_col2:
+    # Exibir projetos do usuário
+    st.subheader("📋 Meus Projetos")
+    
+    username = st.session_state.username
+    user_projects = st.session_state.user_projects.get(username, [])
+    
+    if not user_projects:
+        st.info("🔍 Você ainda não tem projetos. Crie seu primeiro projeto!")
+    else:
+        # Exibir projetos em cards
+        for idx, project in enumerate(user_projects):
+            with st.container():
+                st.markdown(f"""
+                **{project['name']}**  
+                *Tipo:* {project['type']}  
+                *Data:* {project['date'].strftime('%d/%m/%Y') if hasattr(project['date'], 'strftime') else project['date']}  
+                """)
+                st.markdown("---")
+    
+# Formulário de criação de projeto
+if st.session_state.show_project_form:
+    st.subheader("📋 Novo Projeto")
+    
+    with st.form(key="new_project_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            project_name = st.text_input("Nome do Projeto", placeholder="Digite um nome para o projeto")
+            project_desc = st.text_area("Descrição", placeholder="Descreva o objetivo do projeto", height=100)
+            
+        with col2:
+            project_type = st.selectbox("Tipo de Projeto", 
+                                      ["Análise de Biodiversidade", 
+                                       "Monitoramento de Carbono", 
+                                       "Qualidade da Água",
+                                       "Saúde do Solo",
+                                       "Outro"])
+            project_date = st.date_input("Data de Início")
+            
+        submit_project = st.form_submit_button("✅ Salvar Projeto", use_container_width=True)
+        
+        if submit_project:
+            if not project_name:
+                st.error("Por favor, informe pelo menos o nome do projeto!")
+            else:
+                # Criar novo projeto na session
+                username = st.session_state.username
+                
+                # Inicializar a lista de projetos do usuário se ainda não existir
+                if username not in st.session_state.user_projects:
+                    st.session_state.user_projects[username] = []
+                
+                # Adicionar o projeto à lista do usuário
+                new_project = {
+                    'name': project_name,
+                    'description': project_desc,
+                    'type': project_type,
+                    'date': project_date,
+                    'created_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                
+                st.session_state.user_projects[username].append(new_project)
+                st.success(f"Projeto '{project_name}' criado com sucesso!")
+                st.session_state.show_project_form = False  # Fechar formulário após salvar
