@@ -3,6 +3,9 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 import pandas as pd
+import json
+import os
+from pathlib import Path
 
 # Configuração da página
 st.set_page_config(
@@ -37,6 +40,39 @@ def save_config(config):
     """Salva a configuração de usuários no arquivo YAML"""
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
+        
+# Criar diretório de dados se não existir
+def ensure_data_dir():
+    """Garante que o diretório de dados exista"""
+    data_dir = Path("./data")
+    if not data_dir.exists():
+        data_dir.mkdir()
+    return data_dir
+
+# Função para salvar dados do usuário
+def save_user_data(username, data):
+    """Salva os dados do usuário em um arquivo JSON"""
+    data_dir = ensure_data_dir()
+    user_file = data_dir / f"{username}.json"
+    
+    with open(user_file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, default=str, ensure_ascii=False, indent=2)
+        
+# Função para carregar dados do usuário
+def load_user_data(username):
+    """Carrega os dados do usuário de um arquivo JSON"""
+    data_dir = ensure_data_dir()
+    user_file = data_dir / f"{username}.json"
+    
+    if user_file.exists():
+        try:
+            with open(user_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            st.error(f"Erro ao carregar dados do usuário: {e}")
+            return {}
+    else:
+        return {}
 
 # Inicializar configuração e authenticator
 config = load_config()
@@ -63,8 +99,31 @@ def init_session_state():
         st.session_state.theme = "Claro"
     if 'user_projects' not in st.session_state:
         st.session_state.user_projects = {}  # Dicionário para armazenar projetos por username
+    if 'last_save_time' not in st.session_state:
+        st.session_state.last_save_time = pd.Timestamp.now()
 
 init_session_state()
+
+# Função para carregar dados do usuário quando faz login
+def load_user_data_on_login(username):
+    """Carrega os dados do usuário e atualiza a session_state"""
+    user_data = load_user_data(username)
+    
+    # Carregar projetos
+    if 'projects' in user_data:
+        st.session_state.user_projects[username] = user_data['projects']
+    
+    # Carregar configurações pessoais
+    if 'preferences' in user_data:
+        preferences = user_data['preferences']
+        if 'theme' in preferences:
+            st.session_state.theme = preferences['theme']
+        if 'notifications' in preferences:
+            st.session_state.notifications = preferences['notifications']
+    
+    # Carregar outras informações personalizadas
+    if 'custom_data' in user_data:
+        st.session_state.custom_data = user_data['custom_data']
 
 # Sistema de autenticação com streamlit-authenticator
 def check_authentication():
@@ -101,6 +160,10 @@ def login_page():
             st.session_state.user_name = st.session_state["name"]
             st.session_state.login_time = pd.Timestamp.now()
             st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
+            
+            # Carregar dados do usuário
+            load_user_data_on_login(st.session_state["username"])
+            
             st.success(f'✅ Bem-vindo {st.session_state["name"]}!')
             import time
             time.sleep(1)
@@ -114,6 +177,10 @@ def login_page():
             st.session_state.user_name = "Demo User"
             st.session_state.login_time = pd.Timestamp.now()
             st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
+            
+            # Carregar dados do usuário demo
+            load_user_data_on_login("demo")
+            
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
     with tab2:
@@ -176,9 +243,43 @@ if not check_authentication():
     st.stop()  # Para a execução aqui se não estiver autenticado
 
 
+# Função para auto-salvar os dados do usuário
+def auto_save_user_data():
+    """Auto-salvar dados do usuário a cada 5 minutos"""
+    if not st.session_state.get('username'):
+        return
+        
+    current_time = pd.Timestamp.now()
+    last_save = st.session_state.get('last_save_time', pd.Timestamp.now())
+    
+    # Verifica se já passou pelo menos 5 minutos desde a última vez que salvamos
+    if (current_time - last_save).total_seconds() >= 300:  # 300 segundos = 5 minutos
+        username = st.session_state.username
+        
+        # Recuperar os projetos existentes
+        user_projects = st.session_state.user_projects.get(username, [])
+        
+        # Dados a serem salvos
+        user_data = {
+            'projects': user_projects,
+            'preferences': {
+                'theme': st.session_state.theme,
+                'notifications': st.session_state.notifications
+            },
+            'last_update': current_time.strftime("%Y-%m-%d %H:%M:%S"),
+            'auto_saved': True
+        }
+        
+        # Salvar dados do usuário
+        save_user_data(username, user_data)
+        st.session_state.last_save_time = current_time
+
 # Conteúdo principal da aplicação
 
 st.title(f"🌿 Bem-vindo, {st.session_state.get('user_name', '')}!")
+
+# Auto-salvar dados do usuário
+auto_save_user_data()
 
 # Verificar se acabou de fazer login (apenas uma vez)
 current_time = pd.Timestamp.now()
@@ -203,8 +304,44 @@ with main_col1:
         st.session_state.show_project_form = True
 
 with main_col2:
-    # Exibir projetos do usuário
-    st.subheader("📋 Meus Projetos")
+    # Cabeçalho com projetos e logout
+    col_head1, col_head2 = st.columns([3, 1])
+    
+    with col_head1:
+        st.subheader("📋 Meus Projetos")
+    
+    with col_head2:
+        # Botão de logout
+        if st.button("🚪 Logout"):
+            # Salvar os dados do usuário antes de deslogar
+            username = st.session_state.username
+            
+            # Recuperar os projetos existentes
+            user_projects = st.session_state.user_projects.get(username, [])
+            
+            # Salvar dados do usuário antes de deslogar
+            user_data = {
+                'projects': user_projects,
+                'preferences': {
+                    'theme': st.session_state.theme,
+                    'notifications': st.session_state.notifications
+                },
+                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'logout_time': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # Salvar dados
+            save_user_data(username, user_data)
+            
+            # Limpar a sessão
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+                
+            # Reinicializar session state com valores padrão
+            init_session_state()
+            
+            # Recarregar a página
+            st.rerun()
     
     username = st.session_state.username
     user_projects = st.session_state.user_projects.get(username, [])
@@ -265,5 +402,17 @@ if st.session_state.show_project_form:
                 }
                 
                 st.session_state.user_projects[username].append(new_project)
+                
+                # Salvar dados do usuário
+                user_data = {
+                    'projects': st.session_state.user_projects[username],
+                    'preferences': {
+                        'theme': st.session_state.theme,
+                        'notifications': st.session_state.notifications
+                    },
+                    'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                save_user_data(username, user_data)
+                
                 st.success(f"Projeto '{project_name}' criado com sucesso!")
                 st.session_state.show_project_form = False  # Fechar formulário após salvar

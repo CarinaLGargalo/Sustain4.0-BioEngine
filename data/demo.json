@@ -1,0 +1,27 @@
+{
+  "projects": [
+    {
+      "name": "Projeto de Demonstração",
+      "description": "Este é um projeto de exemplo para demonstrar a funcionalidade de persistência de dados.",
+      "type": "Análise de Biodiversidade",
+      "date": "2025-08-01",
+      "created_at": "2025-08-01 10:00:00"
+    },
+    {
+      "name": "Monitoramento Rio Amazonas",
+      "description": "Monitoramento da qualidade da água no Rio Amazonas.",
+      "type": "Qualidade da Água",
+      "date": "2025-07-15",
+      "created_at": "2025-07-15 14:30:00"
+    }
+  ],
+  "preferences": {
+    "theme": "Claro",
+    "notifications": true,
+    "default_chart_type": "Linhas",
+    "color_palette": "Sustentabilidade",
+    "data_density": 500,
+    "units": "Métrico"
+  },
+  "last_update": "2025-08-01 10:00:00"
+}

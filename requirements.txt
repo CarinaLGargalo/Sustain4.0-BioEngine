@@ -5,3 +5,7 @@ scikit-learn
 streamlit_option_menu
 plotly
 streamlit_authenticator
+bcrypt
+pyyaml
+matplotlib
+seaborn

@@ -2,6 +2,14 @@ import streamlit as st
 import yaml
 from yaml.loader import SafeLoader
 import pandas as pd
+import json
+import os
+from pathlib import Path
+import sys
+
+# Adicionar diretório pai ao path para importar funções
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from streamlit_app import save_user_data
 
 # Configuração da página
 st.set_page_config(
@@ -190,6 +198,7 @@ if st.button("Salvar todas as configurações", type="primary"):
     # Atualizar valores de configuração
     # Tema
     config['theme'] = selected_theme
+    st.session_state.theme = selected_theme
     
     # Visualização
     config['default_chart_type'] = default_chart
@@ -204,6 +213,7 @@ if st.button("Salvar todas as configurações", type="primary"):
     
     # Notificações
     config['notifications_enabled'] = notifications_enabled
+    st.session_state.notifications = notifications_enabled
     if notifications_enabled and 'notification_types' in locals():
         config['notification_types'] = notification_types
     if 'email_notifications' in locals():
@@ -213,11 +223,39 @@ if st.button("Salvar todas as configurações", type="primary"):
         if email_notifications and 'email_frequency' in locals():
             config['email_frequency'] = email_frequency
     
-    # Salvar no arquivo
+    # Salvar no arquivo de configuração global
     try:
         save_config(config)
     except Exception as e:
         st.error(f"Erro ao salvar configurações: {e}")
+        
+    # Salvar as preferências do usuário em seu arquivo próprio
+    if st.session_state.get('username'):
+        username = st.session_state.username
+        
+        # Recuperar os projetos existentes (se houver)
+        user_projects = st.session_state.user_projects.get(username, [])
+        
+        # Montar o objeto de dados do usuário
+        user_data = {
+            'projects': user_projects,
+            'preferences': {
+                'theme': selected_theme,
+                'notifications': notifications_enabled,
+                'default_chart_type': default_chart,
+                'color_palette': default_palette,
+                'data_density': data_density,
+                'units': units_system
+            },
+            'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # Salvar dados do usuário
+        try:
+            save_user_data(username, user_data)
+            st.success("Configurações pessoais salvas com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao salvar configurações pessoais: {e}")
 
 # Opção para restaurar padrões
 if st.button("Restaurar configurações padrão"):
