@@ -67,7 +67,7 @@ init_session_state()
 # Sistema de autenticação com streamlit-authenticator
 def check_authentication():
     """Verifica se o usuário está autenticado"""
-    return st.session_state.get('authentication_status', False)
+    return st.session_state.get('authenticated', False)
 
 def login_page():
     """Exibe a página de login com streamlit-authenticator"""
@@ -95,12 +95,14 @@ def login_page():
             st.warning('⚠️ Por favor, insira username e password')
         elif st.session_state["authentication_status"]:
             st.session_state.authenticated = True
+            st.session_state.username = st.session_state["username"]
+            st.session_state.user_name = st.session_state["name"]
             st.session_state.login_time = pd.Timestamp.now()
             st.success(f'✅ Bem-vindo {st.session_state["name"]}!')
             st.balloons()
             import time
             time.sleep(1)
-            st.switch_page("pages/1_🏠_Home.py")
+            st.rerun()  # Recarrega a página para mostrar o conteúdo principal
         
         # Botão Demo (acesso rápido)
         st.markdown("---")
@@ -109,7 +111,7 @@ def login_page():
             st.session_state.username = "demo"
             st.session_state.user_name = "Demo User"
             st.session_state.login_time = pd.Timestamp.now()
-            st.switch_page("pages/1_🏠_Home.py")
+            st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
     with tab2:
         st.markdown("### 📝 Cadastrar Nova Conta")
@@ -183,4 +185,20 @@ if not check_authentication():
     login_page()
     st.stop()  # Para a execução aqui se não estiver autenticado
 
-st.success(f"Login registrado. Volte para a home, {st.session_state.username}.")
+
+# Inicializar session state (mesmo sistema da página principal)
+def init_session_state():
+    if 'user_name' not in st.session_state:
+        st.session_state.user_name = ""
+    if 'notifications' not in st.session_state:
+        st.session_state.notifications = True
+    if 'theme' not in st.session_state:
+        st.session_state.theme = "Claro"
+
+init_session_state()
+
+st.header("🏠 Bem-vindo ao Sustain 4.0 - BioEngine!")
+
+# Verificar se acabou de fazer login
+if st.session_state.get('login_time'):
+    st.balloons()  # Efeito visual de celebração
