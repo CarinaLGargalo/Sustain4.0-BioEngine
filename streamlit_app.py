@@ -99,7 +99,6 @@ def login_page():
             st.session_state.user_name = st.session_state["name"]
             st.session_state.login_time = pd.Timestamp.now()
             st.success(f'✅ Bem-vindo {st.session_state["name"]}!')
-            st.balloons()
             import time
             time.sleep(1)
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
@@ -154,9 +153,8 @@ def login_page():
                     save_config(config)
                     
                     st.success("✅ Conta criada com sucesso!")
-                    st.info("� Agora você pode fazer login na aba Login!")
-                    st.balloons()
-                    
+                    st.info("🔄 Agora você pode fazer login na aba Login!")
+
                     # Limpar cache para recarregar configuração
                     st.cache_data.clear()
                     
