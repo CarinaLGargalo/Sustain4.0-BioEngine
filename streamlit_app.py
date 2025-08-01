@@ -43,10 +43,10 @@ config = load_config()
 
 # Criar o authenticator
 authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'], 
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
+    credentials=config['credentials'],
+    cookie_name=config['cookie']['name'], 
+    key=config['cookie']['key'],
+    cookie_expiry_days=config['cookie']['expiry_days']
 )
 
 # Inicializar session state
@@ -87,7 +87,7 @@ def login_page():
         st.markdown("### 🔓 Fazer Login")
         
         # Widget de login do streamlit-authenticator
-        authenticator.login()
+        authenticator.login(location='main')
         
         if st.session_state["authentication_status"] == False:
             st.error('❌ Username/password incorretos')
