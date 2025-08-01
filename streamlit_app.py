@@ -169,18 +169,6 @@ def login_page():
     # Descrição da plataforma
     st.markdown("---")
     st.write("**Sustain 4.0 BioEngine** é uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.")
-    
-    # Informações de acesso
-    st.markdown("---")
-    st.info("""
-    **💡 Usuários Pré-cadastrados:**
-    - **admin** / admin123 (Administrador)
-    - **pesquisador** / pesq2024 (Pesquisador)
-    - **analista** / anl2024 (Analista)
-    - **demo** / demo123 (Demonstração)
-    
-    Ou registre uma nova conta na aba "Cadastro"!
-    """)
 
 # Verificar autenticação antes de mostrar o conteúdo principal
 if not check_authentication():
