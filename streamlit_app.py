@@ -199,12 +199,8 @@ login_time = st.session_state.get('login_time')
 # Apenas mostrar os balões se:
 # 1. O usuário fez login recentemente (nos últimos 3 segundos)
 # 2. Ainda não mostramos os balões
-if (login_time and 
-    (current_time - login_time).total_seconds() < 3 and 
-    not st.session_state.get('balloons_shown', False)):
+if login_time and (current_time - login_time).total_seconds() < 3:
     st.balloons()  # Efeito visual de celebração
-    # Marcamos que os balões foram mostrados
-    st.session_state.balloons_shown = True
 
 # Criar layout com duas colunas principais
 main_col1, main_col2 = st.columns([2, 1], gap="large")
