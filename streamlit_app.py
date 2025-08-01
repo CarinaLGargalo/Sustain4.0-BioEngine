@@ -138,11 +138,11 @@ def login_page():
     
     # Todo o conteúdo vai na coluna central
     with center_col:
-        # # Centralizar título
-        # st.markdown(
-        #     "<h1 class='main-title' style='text-align: center; font-size: 2.5em; font-weight: 700;'>Sustain4.0 BioEngine</h1>",
-        #     unsafe_allow_html=True
-        # )
+        # Centralizar título
+        st.markdown(
+            "<h1 class='main-title' style='text-align: center; font-size: 2.5em; font-weight: 700;'>Sustain4.0 BioEngine</h1>",
+            unsafe_allow_html=True
+        )
         
         # Criar abas para Login e Registro
         tab1, tab2 = st.tabs(["🔓 Login", "📝 Cadastro"])
