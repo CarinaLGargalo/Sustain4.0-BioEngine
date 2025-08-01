@@ -197,9 +197,9 @@ current_time = pd.Timestamp.now()
 login_time = st.session_state.get('login_time')
 
 # Apenas mostrar os balões se:
-# 1. O usuário fez login recentemente (nos últimos 3 segundos)
+# 1. O usuário fez login recentemente (nos últimos 6 segundos)
 # 2. Ainda não mostramos os balões
-if login_time and (current_time - login_time).total_seconds() < 3:
+if login_time and (current_time - login_time).total_seconds() < 6:
     st.balloons()  # Efeito visual de celebração
 
 # Criar layout com duas colunas principais
