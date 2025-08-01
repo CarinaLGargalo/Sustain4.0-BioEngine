@@ -152,8 +152,6 @@ def login_page():
         
         if st.session_state["authentication_status"] == False:
             st.error('❌ Username/password incorretos')
-        elif st.session_state["authentication_status"] == None:
-            st.warning('⚠️ Por favor, insira username e password')
         elif st.session_state["authentication_status"]:
             st.session_state.authenticated = True
             st.session_state.username = st.session_state["username"]
@@ -163,10 +161,6 @@ def login_page():
             
             # Carregar dados do usuário
             load_user_data_on_login(st.session_state["username"])
-            
-            st.success(f'✅ Bem-vindo {st.session_state["name"]}!')
-            import time
-            time.sleep(1)
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
         
         # Botão Demo (acesso rápido)
