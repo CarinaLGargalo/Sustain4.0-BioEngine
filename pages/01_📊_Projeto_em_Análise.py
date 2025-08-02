@@ -16,6 +16,28 @@ import plotly.graph_objects as go
 import sys
 import os
 
+# Background customizado com opacidade de 30%
+page_bg__img = """
+<style>
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)),
+                url("https://images.unsplash.com/photo-1675130277336-23cb686f01c0?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+[data-testid="stHeader"] {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Garantir que o conteúdo aparece sobre o fundo */
+[data-testid="stToolbar"] {
+    z-index: 1;
+}
+</style>
+"""
+st.markdown(page_bg__img, unsafe_allow_html=True)
+
 # Importar funções do módulo de utilitários
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import check_authentication

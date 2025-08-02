@@ -2,7 +2,43 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
 import os
+import streamlit as st
+import pandas as pd
+import time
+import bcrypt
+
+# Configuração da página - DEVE ser o primeiro comando Streamlit
+st.set_page_config(
+    page_title="Sustain 4.0 - BioEngine",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
 from pathlib import Path
+import streamlit_authenticator as stauth
+
+# Background customizado com opacidade de 30%
+page_bg__img = """
+<style>
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)),
+                url("https://images.unsplash.com/photo-1675130277336-23cb686f01c0?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+[data-testid="stHeader"] {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Garantir que o conteúdo aparece sobre o fundo */
+[data-testid="stToolbar"] {
+    z-index: 1;
+}
+</style>
+"""
+st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Importar funções do módulo utils
 from utils import (
@@ -15,14 +51,6 @@ from utils import (
     init_session_state,
     load_user_data_on_login,
     auto_save_user_data
-)
-
-# Configuração da página
-st.set_page_config(
-    page_title="Sustain 4.0 - BioEngine",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="collapsed"
 )
 
 # Inicializar configuração e authenticator
@@ -232,92 +260,92 @@ with colt2:
 
 st.markdown('---')
 
-# Criar layout com duas colunas principais
-main_col1, main_col2, main_col3 = st.columns([1, 3, 1])
+# # Criar layout com duas colunas principais
+# main_col1, main_col2 = st.columns([1, 1])
 
-with main_col2:
+# with main_col2:
 
-    # Inicializar estados para criação de projeto
-    if 'show_project_form' not in st.session_state:
-        st.session_state.show_project_form = False
+# Inicializar estados para criação de projeto
+if 'show_project_form' not in st.session_state:
+    st.session_state.show_project_form = False
+
+# Botão para criar novo projeto
+if st.button("🧭 Criar Novo Projeto", type="primary"):
+    st.session_state.show_project_form = True
+
+    # Formulário de criação de projeto
+if st.session_state.show_project_form:
+    st.subheader("Novo Projeto")
     
-    # Botão para criar novo projeto
-    if st.button("💡 Criar Novo Projeto"):
-        st.session_state.show_project_form = True
-    
-        # Formulário de criação de projeto
-    if st.session_state.show_project_form:
-        st.subheader("📋 Novo Projeto")
+    with st.form(key="new_project_form"):
+        col1, col2 = st.columns(2)
         
-        with st.form(key="new_project_form"):
-            col1, col2 = st.columns(2)
+        with col1:
+            project_name = st.text_input("Nome do Projeto", placeholder="Digite um nome para o projeto")
+            project_desc = st.text_area("Descrição", placeholder="Descreva o objetivo do projeto", height=100)
             
-            with col1:
-                project_name = st.text_input("Nome do Projeto", placeholder="Digite um nome para o projeto")
-                project_desc = st.text_area("Descrição", placeholder="Descreva o objetivo do projeto", height=100)
-                
-            with col2:
-                project_type = st.selectbox("Tipo de Projeto", 
-                                        ["Análise de Biodiversidade", 
-                                        "Monitoramento de Carbono", 
-                                        "Qualidade da Água",
-                                        "Saúde do Solo",
-                                        "Outro"])
-                project_date = st.date_input("Data de Início")
-                
-            submit_project = st.form_submit_button("✅ Salvar Projeto", use_container_width=True)
+        with col2:
+            project_type = st.selectbox("Tipo de Projeto", 
+                                    ["Análise de Biodiversidade", 
+                                    "Monitoramento de Carbono", 
+                                    "Qualidade da Água",
+                                    "Saúde do Solo",
+                                    "Outro"])
+            project_date = st.date_input("Data de Início")
             
-            if submit_project:
-                if not project_name:
-                    st.error("Por favor, informe pelo menos o nome do projeto!")
-                else:
-                    # Criar novo projeto na session
-                    username = st.session_state.username
-                    
-                    # Inicializar a lista de projetos do usuário se ainda não existir
-                    if username not in st.session_state.user_projects:
-                        st.session_state.user_projects[username] = []
-                    
-                    # Adicionar o projeto à lista do usuário
-                    new_project = {
-                        'name': project_name,
-                        'description': project_desc,
-                        'type': project_type,
-                        'date': project_date,
-                        'created_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                    
-                    st.session_state.user_projects[username].append(new_project)
-                    
-                    # Salvar dados do usuário
-                    user_data = {
-                        'projects': st.session_state.user_projects[username],
-                        'preferences': {
-                            'theme': st.session_state.theme,
-                            'notifications': st.session_state.notifications
-                        },
-                        'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                    save_user_data(username, user_data)
-                    
-                    st.success(f"Projeto '{project_name}' criado com sucesso!")
-                    st.session_state.show_project_form = False  # Fechar formulário após salvar
-                    st.rerun()  # Recarregar a página para mostrar o novo projeto
-    
-    st.subheader("📋 Meus Projetos")
-    username = st.session_state.username
-    user_projects = st.session_state.user_projects.get(username, [])
+        submit_project = st.form_submit_button("✅ Salvar Projeto", use_container_width=True)
+        
+        if submit_project:
+            if not project_name:
+                st.error("Por favor, informe pelo menos o nome do projeto!")
+            else:
+                # Criar novo projeto na session
+                username = st.session_state.username
+                
+                # Inicializar a lista de projetos do usuário se ainda não existir
+                if username not in st.session_state.user_projects:
+                    st.session_state.user_projects[username] = []
+                
+                # Adicionar o projeto à lista do usuário
+                new_project = {
+                    'name': project_name,
+                    'description': project_desc,
+                    'type': project_type,
+                    'date': project_date,
+                    'created_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                
+                st.session_state.user_projects[username].append(new_project)
+                
+                # Salvar dados do usuário
+                user_data = {
+                    'projects': st.session_state.user_projects[username],
+                    'preferences': {
+                        'theme': st.session_state.theme,
+                        'notifications': st.session_state.notifications
+                    },
+                    'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                save_user_data(username, user_data)
+                
+                st.success(f"Projeto '{project_name}' criado com sucesso!")
+                st.session_state.show_project_form = False  # Fechar formulário após salvar
+                st.rerun()  # Recarregar a página para mostrar o novo projeto
 
-    if not user_projects:
-        st.info("Você ainda não tem projetos. Crie seu primeiro projeto!")
-    else:
-    # Exibir projetos em cards
-        for idx, project in enumerate(user_projects):
-            with st.container():
-                st.markdown(f"""
-                **{project['name']}**  
-                *Tipo:* {project['type']}  
-                *Data:* {project['date'].strftime('%d/%m/%Y') if hasattr(project['date'], 'strftime') else project['date']}  
-                """)
-                st.markdown("---")
+st.subheader("Meus Projetos")
+username = st.session_state.username
+user_projects = st.session_state.user_projects.get(username, [])
+
+if not user_projects:
+    st.info("Você ainda não tem projetos. Crie um!")
+else:
+# Exibir projetos em cards
+    for idx, project in enumerate(user_projects):
+        with st.container():
+            st.markdown(f"""
+            **{project['name']}**  
+            *Tipo:* {project['type']}  
+            *Data:* {project['date'].strftime('%d/%m/%Y') if hasattr(project['date'], 'strftime') else project['date']}  
+            """)
+            st.markdown("---")
 
