@@ -169,7 +169,7 @@ def login_page():
 
         # Descrição da plataforma
         st.markdown("---")
-        st.write("**Sustain 4.0 BioEngine** é uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.")
+        st.write(":white[**Sustain 4.0 BioEngine** é uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.]")
 
 # Verificar autenticação antes de mostrar o conteúdo principal
 if not check_authentication():
