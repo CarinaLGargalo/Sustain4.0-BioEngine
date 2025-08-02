@@ -18,7 +18,7 @@ st.set_page_config(
 from pathlib import Path
 import streamlit_authenticator as stauth
 
-# Background customizado com opacidade de 30%
+# Background customizado com opacidade de 40%
 page_bg__img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -86,8 +86,6 @@ def login_page():
         tab1, tab2 = st.tabs(["🔓 Login", "📝 Cadastro"])
         
         with tab1:
-            st.markdown("### 🔓 Fazer Login")
-            
             # Widget de login do streamlit-authenticator
             authenticator.login(location='main')
         
@@ -169,7 +167,7 @@ def login_page():
 
         # Descrição da plataforma
         st.markdown("---")
-        st.write(":blue[Uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.]")
+        st.write("Uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.")
 
 # Verificar autenticação antes de mostrar o conteúdo principal
 if not check_authentication():
