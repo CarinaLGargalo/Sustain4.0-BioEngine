@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import time
 import bcrypt
+from pathlib import Path
 
 # Configuração da página - DEVE ser o primeiro comando Streamlit
 st.set_page_config(
@@ -14,9 +15,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-from pathlib import Path
-import streamlit_authenticator as stauth
 
 # Background customizado com opacidade de 40%
 page_bg__img = """
@@ -204,6 +202,7 @@ if not check_authentication():
 # Conteúdo principal da aplicação
 
 # Auto-salvar dados do usuário
+
 auto_save_user_data()
 
 # Verificar se acabou de fazer login (apenas uma vez)
@@ -213,19 +212,24 @@ login_time = st.session_state.get('login_time')
 # Apenas mostrar os balões se:
 # 1. O usuário fez login recentemente (nos últimos 6 segundos)
 # 2. Ainda não mostramos os balões
-if login_time and (current_time - login_time).total_seconds() < 6:
+if login_time and (current_time - login_time).total_seconds() < 5:
     st.balloons()  # Efeito visual de celebração
 
 # Aqui será colocado o cabeçalho com o nome do usuário e o botão de logout
 
-colt1, colt2 = st.columns([10, 1])
+colt1, colt2, colt3 = st.columns([7, 2, 1])
 
 with colt1:
     st.subheader(f"🌿 Bem-vindo, {st.session_state.get('user_name', '')}!")
 
 with colt2:
+    # Botão para criar novo projeto
+    if st.button("🧭 Criar Novo Projeto", use_container_width=True):
+        st.session_state.show_project_form = True
+
+with colt3:
     # Botão de logout
-    if st.button("Logout"):
+    if st.button("Logout", use_container_width=True):
         # Salvar os dados do usuário antes de deslogar
         username = st.session_state.username
         
@@ -267,11 +271,19 @@ st.markdown('---')
 if 'show_project_form' not in st.session_state:
     st.session_state.show_project_form = False
 
-# Botão para criar novo projeto
-if st.button("🧭 Criar Novo Projeto", type="primary"):
-    st.session_state.show_project_form = True
+# Inicializar estados para edição e exclusão de projetos
+if 'selected_project' not in st.session_state:
+    st.session_state.selected_project = None
+if 'editing_project' not in st.session_state:
+    st.session_state.editing_project = None
+if 'show_edit_form' not in st.session_state:
+    st.session_state.show_edit_form = False
+if 'deleting_project' not in st.session_state:
+    st.session_state.deleting_project = None
+if 'show_delete_confirm' not in st.session_state:
+    st.session_state.show_delete_confirm = False
 
-    # Formulário de criação de projeto
+# Formulário de criação de projeto (se estiver criando)
 if st.session_state.show_project_form:
     st.subheader("Novo Projeto")
     
@@ -334,16 +346,287 @@ st.subheader("Meus Projetos")
 username = st.session_state.username
 user_projects = st.session_state.user_projects.get(username, [])
 
+# Inicializar estado para projeto selecionado
+if 'selected_project' not in st.session_state:
+    st.session_state.selected_project = None
+
 if not user_projects:
     st.info("Você ainda não tem projetos. Crie um!")
 else:
-# Exibir projetos em cards
-    for idx, project in enumerate(user_projects):
-        with st.container():
-            st.markdown(f"""
-            **{project['name']}**  
-            *Tipo:* {project['type']}  
-            *Data:* {project['date'].strftime('%d/%m/%Y') if hasattr(project['date'], 'strftime') else project['date']}  
-            """)
-            st.markdown("---")
+    # Criar layout com duas colunas principais com separador: projetos à esquerda, projeto ativo à direita
+    main_col1, separator_col, main_col2 = st.columns([2, 0.1, 2])
+    
+    with main_col1:
+
+        # CSS personalizado para melhorar o visual dos cards
+        st.markdown("""
+        <style>
+        .project-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .project-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .project-title {
+            color: #2c3e50;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .project-type {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+        .project-date {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .project-description {
+            color: #495057;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Exibir projetos em cards clicáveis aprimorados
+        for idx, project in enumerate(user_projects):
+            with st.container():
+                # HTML personalizado para o card
+                card_html = f"""
+                <div class="project-card">
+                    <div class="project-title">📁 {project['name']}</div>
+                    <div class="project-type">🏷️ <strong>Tipo:</strong> {project['type']}</div>
+                    <div class="project-date">📅 <strong>Data:</strong> {project['date'].strftime('%d/%m/%Y') if hasattr(project['date'], 'strftime') else project['date']}</div>
+                    {f'<div class="project-description">📝 {project["description"]}</div>' if project.get('description') else ''}
+                </div>
+                """
+                st.markdown(card_html, unsafe_allow_html=True)
+                
+                # Botões de ação (mantendo a funcionalidade original)
+                col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+                
+                with col1:
+                    # Botão para abrir o projeto na página de análise
+                    if st.button("📂 Abrir", key=f"open_project_{idx}", use_container_width=True):
+                        # Salvar projeto selecionado no session state
+                        st.session_state.selected_project = idx
+                        st.session_state.current_project = user_projects[idx]
+                        
+                        # Salvar dados do usuário antes de navegar
+                        user_data = {
+                            'projects': st.session_state.user_projects[username],
+                            'preferences': {
+                                'theme': st.session_state.theme,
+                                'notifications': st.session_state.notifications
+                            },
+                            'selected_project_index': idx,
+                            'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        save_user_data(username, user_data)
+                        
+                        # Redirecionar para a página de análise
+                        st.switch_page("pages/01_📊_Projeto_em_Análise.py")
+                
+                with col2:
+                    # Botão para selecionar como projeto ativo
+                    if st.button("🎯 Ativar", key=f"activate_project_{idx}", use_container_width=True):
+                        st.session_state.selected_project = idx
+                        st.rerun()
+                        
+                with col3:
+                    # Botão para editar o projeto
+                    if st.button("✏️ Editar", key=f"edit_project_{idx}", use_container_width=True):
+                        st.session_state.editing_project = idx
+                        st.session_state.show_edit_form = True
+                        
+                with col4:
+                    # Botão para deletar o projeto
+                    if st.button("🗑️ Excluir", key=f"delete_project_{idx}", use_container_width=True):
+                        st.session_state.deleting_project = idx
+                        st.session_state.show_delete_confirm = True
+                
+                st.markdown("<br>", unsafe_allow_html=True)  # Espaçamento entre cards
+    
+    # Coluna separadora com linha vertical
+    with separator_col:
+        st.markdown("""
+        <div style="
+            height: 800px;
+            border-left: 2px solid #e0e0e0;
+            margin: 20px 0;
+            opacity: 0.6;
+        "></div>
+        """, unsafe_allow_html=True)
+    
+    with main_col2:
+        # Mostrar "Projeto Ativo" apenas quando houver um projeto selecionado
+        if st.session_state.selected_project is not None:
+            selected_idx = st.session_state.selected_project
+            if selected_idx < len(user_projects):
+                selected_project = user_projects[selected_idx]
+                
+                st.markdown("#### 📊 Projeto Ativo")
+                with st.container():
+                    # Criar layout com duas colunas: informações à esquerda, ações à direita
+                    info_col, actions_col = st.columns([1, 1])
+                    
+                    with info_col:
+                        st.markdown(f"**📁 {selected_project['name']}**")
+                        st.write(f"**Tipo:** {selected_project['type']}")
+                        st.write(f"**Data:** {selected_project['date'].strftime('%d/%m/%Y') if hasattr(selected_project['date'], 'strftime') else selected_project['date']}")
+                        
+                        if selected_project.get('description'):
+                            st.write(f"**Descrição:** {selected_project['description']}")
+                        
+                        if selected_project.get('created_at'):
+                            st.caption(f"Criado em: {selected_project['created_at']}")
+                    
+                    with actions_col:
+                        
+                        if st.button("📈 Análise Completa", use_container_width=True, key="analysis_active"):
+                            # Abrir projeto na página de análise
+                            st.session_state.current_project = selected_project
+                            user_data = {
+                                'projects': st.session_state.user_projects[username],
+                                'preferences': {
+                                    'theme': st.session_state.theme,
+                                    'notifications': st.session_state.notifications
+                                },
+                                'selected_project_index': selected_idx,
+                                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            save_user_data(username, user_data)
+                            st.switch_page("pages/01_📊_Projeto_em_Análise.py")
+                        
+                        if st.button("❌ Fechar Projeto", use_container_width=True, key="close_active"):
+                            st.session_state.selected_project = None
+                            st.rerun()
+        
+        # Formulário de edição (se estiver editando)
+        if st.session_state.get('show_edit_form') and st.session_state.get('editing_project') is not None:
+            editing_idx = st.session_state.editing_project
+            if editing_idx < len(user_projects):
+                project_to_edit = user_projects[editing_idx]
+                
+                st.markdown("---")
+                st.markdown("### ✏️ Editar Projeto")
+                with st.form(key="edit_project_form"):
+                    edit_name = st.text_input("Nome do Projeto", value=project_to_edit['name'])
+                    edit_desc = st.text_area("Descrição", value=project_to_edit.get('description', ''), height=100)
+                    edit_type = st.selectbox("Tipo de Projeto", 
+                                            ["Análise de Biodiversidade", 
+                                            "Monitoramento de Carbono", 
+                                            "Qualidade da Água",
+                                            "Saúde do Solo",
+                                            "Outro"],
+                                            index=["Análise de Biodiversidade", 
+                                                  "Monitoramento de Carbono", 
+                                                  "Qualidade da Água",
+                                                  "Saúde do Solo",
+                                                  "Outro"].index(project_to_edit['type']) if project_to_edit['type'] in ["Análise de Biodiversidade", "Monitoramento de Carbono", "Qualidade da Água", "Saúde do Solo", "Outro"] else 0)
+                    
+                    # Converter para date se for string
+                    if isinstance(project_to_edit['date'], str):
+                        try:
+                            date_value = pd.to_datetime(project_to_edit['date']).date()
+                        except:
+                            date_value = pd.Timestamp.now().date()
+                    else:
+                        date_value = project_to_edit['date']
+                    
+                    edit_date = st.date_input("Data de Início", value=date_value)
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.form_submit_button("💾 Salvar", use_container_width=True):
+                            # Atualizar projeto
+                            st.session_state.user_projects[username][editing_idx] = {
+                                'name': edit_name,
+                                'description': edit_desc,
+                                'type': edit_type,
+                                'date': edit_date,
+                                'created_at': project_to_edit.get('created_at', pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")),
+                                'updated_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            
+                            # Salvar dados
+                            user_data = {
+                                'projects': st.session_state.user_projects[username],
+                                'preferences': {
+                                    'theme': st.session_state.theme,
+                                    'notifications': st.session_state.notifications
+                                },
+                                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            save_user_data(username, user_data)
+                            
+                            st.success("Projeto atualizado com sucesso!")
+                            st.session_state.show_edit_form = False
+                            st.session_state.editing_project = None
+                            st.rerun()
+                    
+                    with col2:
+                        if st.form_submit_button("❌ Cancelar", use_container_width=True):
+                            st.session_state.show_edit_form = False
+                            st.session_state.editing_project = None
+                            st.rerun()
+
+        # Confirmação de exclusão (se estiver excluindo)
+        if st.session_state.get('show_delete_confirm') and st.session_state.get('deleting_project') is not None:
+            deleting_idx = st.session_state.deleting_project
+            if deleting_idx < len(user_projects):
+                project_to_delete = user_projects[deleting_idx]
+                
+                st.markdown("---")
+                st.warning(f"⚠️ Tem certeza que deseja excluir o projeto '{project_to_delete['name']}'?")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🗑️ Sim, Excluir", type="primary", use_container_width=True, key="confirm_delete_sidebar"):
+                        # Remover projeto
+                        st.session_state.user_projects[username].pop(deleting_idx)
+                        
+                        # Ajustar índice do projeto selecionado se necessário
+                        if st.session_state.selected_project == deleting_idx:
+                            st.session_state.selected_project = None
+                        elif st.session_state.selected_project is not None and st.session_state.selected_project > deleting_idx:
+                            st.session_state.selected_project -= 1
+                        
+                        # Salvar dados
+                        user_data = {
+                            'projects': st.session_state.user_projects[username],
+                            'preferences': {
+                                'theme': st.session_state.theme,
+                                'notifications': st.session_state.notifications
+                            },
+                            'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        save_user_data(username, user_data)
+                        
+                        st.success("Projeto excluído com sucesso!")
+                        st.session_state.show_delete_confirm = False
+                        st.session_state.deleting_project = None
+                        st.rerun()
+                
+                with col2:
+                    if st.button("❌ Cancelar", use_container_width=True, key="cancel_delete_sidebar"):
+                        st.session_state.show_delete_confirm = False
+                        st.session_state.deleting_project = None
+                        st.rerun()
+
 

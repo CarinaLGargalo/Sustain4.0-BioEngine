@@ -97,6 +97,14 @@ def load_user_data_on_login(username):
     if 'projects' in user_data:
         st.session_state.user_projects[username] = user_data['projects']
     
+    # Carregar projeto selecionado anteriormente (se existir)
+    if 'selected_project_index' in user_data:
+        projects = st.session_state.user_projects.get(username, [])
+        selected_idx = user_data['selected_project_index']
+        if 0 <= selected_idx < len(projects):
+            st.session_state.selected_project = selected_idx
+            st.session_state.current_project = projects[selected_idx]
+    
     # Carregar configurações pessoais
     if 'preferences' in user_data:
         preferences = user_data['preferences']

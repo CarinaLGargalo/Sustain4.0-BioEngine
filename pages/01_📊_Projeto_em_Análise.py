@@ -47,9 +47,6 @@ if not st.session_state.get('authenticated', False):
     st.info("🔐 Por favor, faça login na página principal.")
     st.stop()
 
-# Cabeçalho da página
-st.header("📊 Projeto em Análise")
-
 # Verificar se há projetos disponíveis
 username = st.session_state.username
 user_projects = st.session_state.user_projects.get(username, [])
@@ -58,16 +55,63 @@ if not user_projects:
     st.warning("Você ainda não tem projetos. Crie um projeto na página principal.")
     st.stop()
 
-# Selecionar projeto para análise
-project_names = [project['name'] for project in user_projects]
-selected_project_name = st.selectbox("Selecione um projeto para análise:", project_names)
+# Verificar se há um projeto pré-selecionado da página principal
+selected_project = None
+selected_project_name = None
 
-# Encontrar o projeto selecionado
-selected_project = next((p for p in user_projects if p['name'] == selected_project_name), None)
+if st.session_state.get('current_project'):
+    # Usar projeto selecionado da página principal
+    selected_project = st.session_state.current_project
+    selected_project_name = selected_project['name']
+else:
+    # Selecionar projeto manualmente
+    project_names = [project['name'] for project in user_projects]
+    selected_project_name = st.selectbox("Selecione um projeto para análise:", project_names)
+    
+    # Encontrar o projeto selecionado
+    selected_project = next((p for p in user_projects if p['name'] == selected_project_name), None)
+    
+    # Salvar no session state
+    if selected_project:
+        st.session_state.current_project = selected_project
 
+# Cabeçalho da página com nome do projeto
+col1, col2, col3, col4 = st.columns([4, 1, 1, 1])
+
+with col1:
+    if selected_project_name:
+        st.header(f"📊 {selected_project_name}")
+        st.caption("Projeto em Análise")
+    else:
+        st.header("📊 Projeto em Análise")
+
+with col2:
+    # Espaçamento
+    st.write("")
+
+with col3:
+    # Botão para editar projeto (apenas se houver projeto selecionado)
+    if st.session_state.get('current_project'):
+        if st.button("✏️ Editar Projeto", use_container_width=True):
+            st.info("🚧 Redirecionando para edição... (em desenvolvimento)")
+
+with col4:
+    # Botão para voltar à página principal
+    if st.button("🏠 Voltar ao Início", use_container_width=True):
+        st.switch_page("streamlit_app.py")
+
+# Mostrar informações do projeto se selecionado
+if st.session_state.get('current_project'):
+    selected_project = st.session_state.current_project
+    selected_project_name = selected_project['name']
+
+# Verificar se temos um projeto selecionado para análise
 if selected_project:
     # Exibir informações do projeto
-    st.subheader(f"Análise do Projeto: {selected_project['name']}")
+    st.subheader(f"📊 Análise Detalhada")
+    st.markdown(f"**Projeto:** {selected_project['name']}")
+    st.markdown(f"**Tipo:** {selected_project['type']}")
+    st.markdown("---")
     
     # Criar abas para diferentes análises
     tab1, tab2, tab3, tab4 = st.tabs(["📈 Visão Geral", "🌱 Biodiversidade", "🌡️ Carbono", "💧 Água"])
