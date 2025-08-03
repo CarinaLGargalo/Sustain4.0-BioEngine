@@ -461,7 +461,7 @@ if 'show_delete_confirm' not in st.session_state:
 # Formulário de criação de projeto (se estiver criando)
 if st.session_state.show_project_form:
     st.subheader("Novo Projeto")
-    
+    st.write('Preencha os campos abaixo para configurar o seu novo projeto.')
     with st.form(key="new_project_form"):
         col1, col2 = st.columns(2)
         
