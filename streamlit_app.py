@@ -68,15 +68,174 @@ init_session_state()
 def login_page():
     """Exibe a página de login com streamlit-authenticator"""
     
+    # CSS personalizado para melhorar o visual da página de login
+    st.markdown("""
+    <style>
+    /* Container principal da página de login */
+    .login-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 40px;
+        margin: 20px 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    /* Título principal */
+    .main-title {
+        background: linear-gradient(135deg, #2c3e50, #27ae60, #3498db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        font-size: 3em !important;
+        font-weight: 800 !important;
+        margin-bottom: 30px !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Estilo das abas */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 15px;
+        padding: 5px;
+        margin-bottom: 30px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 12px;
+        padding: 15px 25px;
+        background: transparent;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #3498db, #2ecc71) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+    
+    /* Formulários */
+    .stForm {
+        background: rgba(248, 249, 250, 0.9);
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid rgba(222, 226, 230, 0.5);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    /* Inputs */
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div > div,
+    .stTextArea > div > div > textarea {
+        border-radius: 10px !important;
+        border: 2px solid #e9ecef !important;
+        padding: 12px 15px !important;
+        transition: all 0.3s ease !important;
+        background: rgba(255,255,255,0.9) !important;
+    }
+    
+    .stTextInput > div > div > input:focus,
+    .stSelectbox > div > div > div:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: #3498db !important;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
+    }
+    
+    /* Botões */
+    .stButton > button {
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        padding: 12px 25px !important;
+        border: none !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    /* Botão primário */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #3498db, #2ecc71) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+    }
+    
+    /* Botão demo */
+    .stButton > button:not([kind="primary"]) {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3) !important;
+    }
+    
+    /* Mensagens */
+    .stSuccess {
+        background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 15px 20px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3) !important;
+    }
+    
+    .stError {
+        background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 15px 20px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
+    }
+    
+    .stInfo {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 15px 20px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    }
+    
+    /* Descrição da plataforma */
+    .platform-description {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 30px;
+        border-left: 4px solid #2ecc71;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #2c3e50;
+    }
+    
+    /* Ícones e emojis */
+    .icon-enhancement {
+        font-size: 1.2em;
+        margin-right: 8px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Criar layout com uma coluna central
     col1, center_col, col3 = st.columns([1, 2, 1])
     
     # Todo o conteúdo vai na coluna central
     with center_col:
-
-        # Centralizar título
+        # Container principal com estilo personalizado
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        
+        # Título principal estilizado
         st.markdown(
-            "<h1 class='main-title' style='text-align: center; font-size: 2.5em; font-weight: 700;'>Sustain4.0 BioEngine</h1>",
+            '<h1 class="main-title">🌿 Sustain4.0 BioEngine</h1>',
             unsafe_allow_html=True
         )
         
@@ -84,6 +243,7 @@ def login_page():
         tab1, tab2 = st.tabs(["🔓 Login", "📝 Cadastro"])
         
         with tab1:
+            st.markdown("### 🚀 Acesse sua conta")
             # Widget de login do streamlit-authenticator
             authenticator.login(location='main')
         
@@ -100,8 +260,10 @@ def login_page():
             load_user_data_on_login(st.session_state["username"])
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
         
-        # Botão Demo (acesso rápido)
-        if st.button("👁️ Demo - Acesso Rápido", use_container_width=True):
+        # Botão Demo (acesso rápido) com estilo aprimorado
+        st.markdown("---")
+        st.markdown("### 🎯 Acesso Rápido")
+        if st.button("👁️ Demo - Explorar Plataforma", use_container_width=True):
             st.session_state.authenticated = True
             st.session_state.username = "demo"
             st.session_state.user_name = "Demo User"
@@ -114,19 +276,25 @@ def login_page():
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
         with tab2:
-            st.markdown("### 📝 Cadastrar Nova Conta")
+            st.markdown("### 🆕 Criar nova conta")
             
             # Formulário customizado de registro
             with st.form("register_form"):
-                st.write("Preencha os dados para criar sua conta:")
+                st.markdown("**📋 Preencha os dados para criar sua conta:**")
                 
-                new_name = st.text_input("Nome Completo:", placeholder="Digite seu nome completo")
-                new_username = st.text_input("Username:", placeholder="Escolha um nome de usuário único")
-                new_email = st.text_input("Email:", placeholder="Digite seu email")
-                new_password = st.text_input("Senha:", type="password", placeholder="Digite uma senha segura")
-                new_password_repeat = st.text_input("Confirmar Senha:", type="password", placeholder="Digite a senha novamente")
+                col_reg1, col_reg2 = st.columns(2)
+                
+                with col_reg1:
+                    new_name = st.text_input("👤 Nome Completo:", placeholder="Digite seu nome completo")
+                    new_username = st.text_input("🔑 Username:", placeholder="Escolha um nome de usuário único")
+                
+                with col_reg2:
+                    new_email = st.text_input("📧 Email:", placeholder="Digite seu email")
+                    
+                new_password = st.text_input("🔒 Senha:", type="password", placeholder="Digite uma senha segura")
+                new_password_repeat = st.text_input("🔒 Confirmar Senha:", type="password", placeholder="Digite a senha novamente")
             
-                submit_button = st.form_submit_button("📝 Criar Conta", type="primary", use_container_width=True)
+                submit_button = st.form_submit_button("🎉 Criar Conta", type="primary", use_container_width=True)
                 
                 if submit_button:
                     # Validações
@@ -163,9 +331,24 @@ def login_page():
                         time.sleep(2)
                         st.rerun()
 
-        # Descrição da plataforma
-        st.markdown("---")
-        st.write("Uma plataforma integrada de análise de sustentabilidade ambiental. Fornecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo análises de biodiversidade, monitoramento de carbono, qualidade da água e saúde do solo.")
+        # Fechar container principal
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Descrição da plataforma estilizada
+        st.markdown("""
+        <div class="platform-description">
+            <h4>🌍 Sobre a Plataforma</h4>
+            <p><strong>Sustain4.0 BioEngine</strong> é uma plataforma integrada de análise de sustentabilidade ambiental. 
+            Oferecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo:</p>
+            <ul>
+                <li>🌿 <strong>Análises de biodiversidade</strong> - Monitoramento da vida selvagem</li>
+                <li>🌱 <strong>Monitoramento de carbono</strong> - Rastreamento de emissões</li>
+                <li>💧 <strong>Qualidade da água</strong> - Análise de recursos hídricos</li>
+                <li>🌱 <strong>Saúde do solo</strong> - Avaliação da fertilidade</li>
+            </ul>
+            <p>Transforme dados ambientais em insights acionáveis para um futuro mais sustentável! 🚀</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Verificar autenticação antes de mostrar o conteúdo principal
 if not check_authentication():
@@ -418,11 +601,11 @@ else:
                 st.markdown(card_html, unsafe_allow_html=True)
                 
                 # Botões de ação (mantendo a funcionalidade original)
-                col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+                col1, col2, col3 = st.columns([1, 1, 1])
                 
                 with col1:
                     # Botão para abrir o projeto na página de análise
-                    if st.button("📂 Abrir", key=f"open_project_{idx}", use_container_width=True):
+                    if st.button("✅ Iniciar", key=f"open_project_{idx}", use_container_width=True):
                         # Salvar projeto selecionado no session state
                         st.session_state.selected_project = idx
                         st.session_state.current_project = user_projects[idx]
@@ -441,20 +624,14 @@ else:
                         
                         # Redirecionar para a página de análise
                         st.switch_page("pages/01_📊_Projeto_em_Análise.py")
-                
-                with col2:
-                    # Botão para selecionar como projeto ativo
-                    if st.button("🎯 Ativar", key=f"activate_project_{idx}", use_container_width=True):
-                        st.session_state.selected_project = idx
-                        st.rerun()
                         
-                with col3:
+                with col2:
                     # Botão para editar o projeto
                     if st.button("✏️ Editar", key=f"edit_project_{idx}", use_container_width=True):
                         st.session_state.editing_project = idx
                         st.session_state.show_edit_form = True
                         
-                with col4:
+                with col3:
                     # Botão para deletar o projeto
                     if st.button("🗑️ Excluir", key=f"delete_project_{idx}", use_container_width=True):
                         st.session_state.deleting_project = idx
