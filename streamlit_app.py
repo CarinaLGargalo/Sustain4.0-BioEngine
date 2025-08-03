@@ -754,11 +754,18 @@ if not st.session_state.show_project_form:
         if st.session_state.selected_project is not None:    
             st.markdown("""
             <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 height: 800px;
-                border-left: 2px solid #e0e0e0;
-                margin: 20px 0;
-                opacity: 0.6;
-            "></div>
+                width: 100%;
+            ">
+                <div style="
+                    height: 600px;
+                    border-left: 2px solid #e0e0e0;
+                    opacity: 0.6;
+                "></div>
+            </div>
             """, unsafe_allow_html=True)
 
     with main_col2:
