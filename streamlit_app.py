@@ -87,11 +87,13 @@ def login_page():
     
     /* Estilo das abas */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 0px;
         background: rgba(255,255,255,0.8);
         border-radius: 15px;
         padding: 5px;
         margin-bottom: 30px;
+        display: flex;
+        width: 100%;
     }
     
     .stTabs [data-baseweb="tab"] {
@@ -101,6 +103,9 @@ def login_page():
         border: none;
         font-weight: 600;
         transition: all 0.3s ease;
+        flex: 1;
+        text-align: center;
+        width: 50%;
     }
     
     .stTabs [aria-selected="true"] {
