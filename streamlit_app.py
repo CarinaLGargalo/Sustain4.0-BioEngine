@@ -526,7 +526,7 @@ if 'selected_project' not in st.session_state:
 if not user_projects:
     st.info("Você ainda não tem projetos. Crie um!")
 else:
-    # Criar layout com duas colunas principais com separador: projetos à esquerda, projeto ativo à direita
+    # Criar layout com duas colunas principais com separador: projetos à esquerda, retomar projeto à direita
     main_col1, separator_col, main_col2 = st.columns([2, 0.1, 2])
     
     with main_col1:
@@ -641,13 +641,13 @@ else:
         """, unsafe_allow_html=True)
     
     with main_col2:
-        # Mostrar "Projeto Ativo" apenas quando houver um projeto selecionado
+        # Mostrar "Retomar Projeto" apenas quando houver um projeto selecionado
         if st.session_state.selected_project is not None:
             selected_idx = st.session_state.selected_project
             if selected_idx < len(user_projects):
                 selected_project = user_projects[selected_idx]
                 
-                st.markdown("#### 📊 Projeto Ativo")
+                st.markdown("#### 🔄️ Retomar Projeto")
                 with st.container():
                     # Criar layout com duas colunas: informações à esquerda, ações à direita
                     info_col, actions_col = st.columns([1, 1])
@@ -679,10 +679,6 @@ else:
                             }
                             save_user_data(username, user_data)
                             st.switch_page("pages/01_📊_Projeto_em_Análise.py")
-                        
-                        if st.button("❌ Fechar Projeto", use_container_width=True, key="close_active"):
-                            st.session_state.selected_project = None
-                            st.rerun()
         
         # Formulário de edição (se estiver editando)
         if st.session_state.get('show_edit_form') and st.session_state.get('editing_project') is not None:
