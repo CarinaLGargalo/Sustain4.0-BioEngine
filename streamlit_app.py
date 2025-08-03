@@ -684,19 +684,20 @@ if not st.session_state.show_project_form:
 
     # Coluna separadora com linha vertical
     with separator_col:
-        st.markdown("""
-        <div style="
-            height: 800px;
-            border-left: 2px solid #e0e0e0;
-            margin: 20px 0;
-            opacity: 0.6;
-        "></div>
-        """, unsafe_allow_html=True)
+        if st.session_state.selected_project is not None:    
+            st.markdown("""
+            <div style="
+                height: 800px;
+                border-left: 2px solid #e0e0e0;
+                margin: 20px 0;
+                opacity: 0.6;
+            "></div>
+            """, unsafe_allow_html=True)
 
     with main_col2:
-        st.subheader("Recentes")
         # Mostrar "Retomar Projeto" apenas quando houver um projeto selecionado
         if st.session_state.selected_project is not None:
+            st.subheader("Recentes")
             selected_idx = st.session_state.selected_project
             if selected_idx < len(user_projects):
                 selected_project = user_projects[selected_idx]
