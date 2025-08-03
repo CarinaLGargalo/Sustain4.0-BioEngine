@@ -230,10 +230,9 @@ def login_page():
         )
         
         # Criar abas para Login e Registro
-        tab1, tab2 = st.tabs(["🔓 Login", "📝 Cadastro"])
+        tab1, tab2 = st.tabs(["Login", "Cadastro"])
         
         with tab1:
-            st.markdown("### 🚀 Acesse sua conta")
             # Widget de login do streamlit-authenticator
             authenticator.login(location='main')
         
@@ -266,7 +265,7 @@ def login_page():
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
         with tab2:
-            st.markdown("### 🆕 Criar nova conta")
+            st.markdown("### Criar nova conta")
             
             # Formulário customizado de registro
             with st.form("register_form"):
