@@ -81,7 +81,6 @@ col1, col2, col3, col4 = st.columns([4, 1, 1, 1])
 with col1:
     if selected_project_name:
         st.header(f"📊 {selected_project_name}")
-        st.caption("Projeto em Análise")
     else:
         st.header("📊 Projeto em Análise")
 
@@ -100,6 +99,8 @@ with col4:
     if st.button("🏠 Voltar ao Início", use_container_width=True):
         st.switch_page("streamlit_app.py")
 
+st.markdown('---')
+
 # Mostrar informações do projeto se selecionado
 if st.session_state.get('current_project'):
     selected_project = st.session_state.current_project
@@ -108,7 +109,7 @@ if st.session_state.get('current_project'):
 # Verificar se temos um projeto selecionado para análise
 if selected_project:
     # Exibir informações do projeto
-    st.subheader(f"📊 Análise Detalhada")
+    st.subheader(f"Informações do Projeto")
     
     # Informações básicas do projeto LCA
     col1, col2 = st.columns(2)
