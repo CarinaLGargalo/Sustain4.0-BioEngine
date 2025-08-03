@@ -1,24 +1,29 @@
 {
   "projects": [
     {
-      "name": "Super Projeto",
-      "description": "Ihuuuu",
-      "type": "Análise de Biodiversidade",
-      "date": "2025-08-03",
-      "created_at": "2025-08-03 02:04:12"
-    },
-    {
-      "name": "Projeto Gigante",
-      "description": "Descrição gigante.",
-      "type": "Análise de Biodiversidade",
-      "date": "2025-08-03",
-      "created_at": "2025-08-03 02:29:12"
+      "name": "Super Mega Projeto",
+      "key_code": "604339",
+      "goal_statement": "Este é um projeto absurdamente grande, maior que todos os outros no mundo.",
+      "intended_application": "Vou usá-lo como minha arma secreta.",
+      "level_of_detail": "Detailed",
+      "type_of_lca": "Traditional",
+      "methodology": "Consequential",
+      "scale": "industrial",
+      "reference_flow": "Super Fluxo",
+      "system_boundaries": "cradle-to-cradle",
+      "system_boundaries_figure": "data\\figures\\admin_604339_Background.png",
+      "product_system": "Option B - Food Products",
+      "functional_unit": "kg of product",
+      "region": "Denmark",
+      "sharing_principle": "Economic Share",
+      "reason_sharing_principle": "Sou muito benevolente.",
+      "created_at": "2025-08-03 21:29:35"
     }
   ],
   "preferences": {
     "theme": "Claro",
     "notifications": true
   },
-  "last_update": "2025-08-03 20:44:48",
-  "auto_saved": true
+  "last_update": "2025-08-03 21:36:25",
+  "logout_time": "2025-08-03 21:36:25"
 }
