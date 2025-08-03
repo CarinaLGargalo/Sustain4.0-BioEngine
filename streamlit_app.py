@@ -274,8 +274,6 @@ def login_page():
             
             # Formulário customizado de registro
             with st.form("register_form"):
-                st.markdown("**📋 Preencha os dados para criar sua conta:**")
-                
                 col_reg1, col_reg2 = st.columns(2)
                 
                 with col_reg1:
