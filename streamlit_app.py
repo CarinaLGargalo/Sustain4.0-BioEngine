@@ -71,16 +71,6 @@ def login_page():
     # CSS personalizado para melhorar o visual da página de login
     st.markdown("""
     <style>
-    /* Container principal da página de login */
-    .login-container {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        padding: 40px;
-        margin: 20px 0;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.3);
-    }
     
     /* Título principal */
     .main-title {
