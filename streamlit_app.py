@@ -477,7 +477,15 @@ if st.session_state.show_project_form:
                                      ["Attributional", "Consequential"])
             scale = st.selectbox("Scale", 
                                ["lab", "pilot", "industrial"])
-            reference_flow = st.text_input("Reference Flow", placeholder="Defina o fluxo de referência")
+            colun1, colun2, colun3 = st.columns([1, 2, 2])
+            st.write("Reference Flow")
+            with colun1:
+                reference_flow = st.number_input("Amount", placeholder="ex: 1000", min_value=0, step=1)
+            with colun2:
+                reference_flow_unit = st.selectbox("Unit", ["kg", "L", "m³", "MJ"])
+            with colun3:
+                reference_flow_description = st.selectbox("Time Unit", ["hour", "day", "month", "year"])
+
             system_boundaries = st.selectbox("System Boundaries", 
                                            ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"])
             
@@ -519,6 +527,8 @@ if st.session_state.show_project_form:
         if submit_project:
             if not project_name:
                 st.error("Por favor, informe pelo menos o nome do projeto!")
+            elif reference_flow <= 0:
+                st.error("Por favor, informe um valor válido para o Reference Flow!")
             else:
                 # Gerar key code aleatório de 6 dígitos
                 import random
@@ -556,6 +566,8 @@ if st.session_state.show_project_form:
                     'methodology': methodology,
                     'scale': scale,
                     'reference_flow': reference_flow,
+                    'reference_flow_unit': reference_flow_unit,
+                    'reference_flow_description': reference_flow_description,
                     'system_boundaries': system_boundaries,
                     'system_boundaries_figure': str(figure_path) if figure_path else None,
                     'product_system': product_system,
@@ -822,31 +834,76 @@ if not st.session_state.show_project_form:
                     
                     col1, col2 = st.columns(2)
                     with col1:
+                        # Tratamento seguro para selectbox com índices
+                        level_options = ["Screening", "Streamlined", "Detailed"]
+                        current_level = project_to_edit.get('level_of_detail', 'Screening')
+                        level_index = level_options.index(current_level) if current_level in level_options else 0
                         edit_level = st.selectbox("Level of Detail", 
-                                                ["Screening", "Streamlined", "Detailed"],
-                                                index=["Screening", "Streamlined", "Detailed"].index(project_to_edit.get('level_of_detail', 'Screening')))
+                                                level_options,
+                                                index=level_index)
+                        
+                        lca_type_options = ["Prospective", "Traditional", "AESA"]
+                        current_lca_type = project_to_edit.get('type_of_lca', project_to_edit.get('type', 'Traditional'))
+                        lca_type_index = lca_type_options.index(current_lca_type) if current_lca_type in lca_type_options else 1
                         edit_lca_type = st.selectbox("Type of LCA study", 
-                                                   ["Prospective", "Traditional", "AESA"],
-                                                   index=["Prospective", "Traditional", "AESA"].index(project_to_edit.get('type_of_lca', project_to_edit.get('type', 'Traditional'))))
+                                                   lca_type_options,
+                                                   index=lca_type_index)
+                        
+                        methodology_options = ["Attributional", "Consequential"]
+                        current_methodology = project_to_edit.get('methodology', 'Attributional')
+                        methodology_index = methodology_options.index(current_methodology) if current_methodology in methodology_options else 0
                         edit_methodology = st.selectbox("Methodology", 
-                                                       ["Attributional", "Consequential"],
-                                                       index=["Attributional", "Consequential"].index(project_to_edit.get('methodology', 'Attributional')))
+                                                       methodology_options,
+                                                       index=methodology_index)
+                        
+                        scale_options = ["lab", "pilot", "industrial"]
+                        current_scale = project_to_edit.get('scale', 'lab')
+                        scale_index = scale_options.index(current_scale) if current_scale in scale_options else 0
                         edit_scale = st.selectbox("Scale", 
-                                                 ["lab", "pilot", "industrial"],
-                                                 index=["lab", "pilot", "industrial"].index(project_to_edit.get('scale', 'lab')))
+                                                 scale_options,
+                                                 index=scale_index)
                     with col2:
-                        edit_reference_flow = st.text_input("Reference Flow", value=project_to_edit.get('reference_flow', ''))
+                        # Reference Flow sem colunas aninhadas
+                        st.write("Reference Flow")
+                        edit_reference_flow = st.number_input("Amount", 
+                                                            value=float(project_to_edit.get('reference_flow', 0)), 
+                                                            min_value=0.0, step=1.0, key="edit_ref_flow")
+                        
+                        unit_options = ["kg", "L", "m³", "MJ"]
+                        current_unit = project_to_edit.get('reference_flow_unit', 'kg')
+                        unit_index = unit_options.index(current_unit) if current_unit in unit_options else 0
+                        edit_reference_flow_unit = st.selectbox("Unit", 
+                                                               unit_options,
+                                                               index=unit_index)
+                        
+                        time_options = ["hour", "day", "month", "year"]
+                        current_time = project_to_edit.get('reference_flow_description', 'day')
+                        time_index = time_options.index(current_time) if current_time in time_options else 1
+                        edit_reference_flow_description = st.selectbox("Time Unit", 
+                                                                      time_options,
+                                                                      index=time_index)
+                        
+                        boundaries_options = ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"]
+                        current_boundaries = project_to_edit.get('system_boundaries', 'gate-to-gate')
+                        boundaries_index = boundaries_options.index(current_boundaries) if current_boundaries in boundaries_options else 0
                         edit_boundaries = st.selectbox("System Boundaries", 
-                                                      ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"],
-                                                      index=["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"].index(project_to_edit.get('system_boundaries', 'gate-to-gate')))
+                                                      boundaries_options,
+                                                      index=boundaries_index)
+                        
+                        product_options = ["Option A - Biofuels", "Option B - Food Products", "Option C - Building Materials", 
+                                         "Option D - Electronics", "Option E - Chemicals", "Option F - Energy Systems"]
+                        current_product = project_to_edit.get('product_system', 'Option A - Biofuels')
+                        product_index = product_options.index(current_product) if current_product in product_options else 0
                         edit_product = st.selectbox("Product/system to be studied", 
-                                                   ["Option A - Biofuels", "Option B - Food Products", "Option C - Building Materials", 
-                                                    "Option D - Electronics", "Option E - Chemicals", "Option F - Energy Systems"],
-                                                   index=["Option A - Biofuels", "Option B - Food Products", "Option C - Building Materials", 
-                                                          "Option D - Electronics", "Option E - Chemicals", "Option F - Energy Systems"].index(project_to_edit.get('product_system', 'Option A - Biofuels')))
+                                                   product_options,
+                                                   index=product_index)
+                        
+                        region_options = ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"]
+                        current_region = project_to_edit.get('region', 'Brazil')
+                        region_index = region_options.index(current_region) if current_region in region_options else 0
                         edit_region = st.selectbox("Region", 
-                                                  ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"],
-                                                  index=["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"].index(project_to_edit.get('region', 'Brazil')))
+                                                  region_options,
+                                                  index=region_index)
                     
                     # Functional Unit baseado no Product/system selecionado
                     functional_unit_options = {
@@ -869,9 +926,12 @@ if not st.session_state.show_project_form:
                     
                     # Absolute Sustainability Study
                     with st.expander("Absolute Sustainability Study?"):
+                        sharing_options = ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"]
+                        current_sharing = project_to_edit.get('sharing_principle', 'Equal per Capita')
+                        sharing_index = sharing_options.index(current_sharing) if current_sharing in sharing_options else 0
                         edit_sharing = st.selectbox("Sharing Principle", 
-                                                   ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"],
-                                                   index=["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"].index(project_to_edit.get('sharing_principle', 'Equal per Capita')))
+                                                   sharing_options,
+                                                   index=sharing_index)
                         edit_reason_sharing = st.text_input("Reason for Sharing Principle", 
                                                            value=project_to_edit.get('reason_sharing_principle', ''))
                     
@@ -889,6 +949,8 @@ if not st.session_state.show_project_form:
                                 'methodology': edit_methodology,
                                 'scale': edit_scale,
                                 'reference_flow': edit_reference_flow,
+                                'reference_flow_unit': edit_reference_flow_unit,
+                                'reference_flow_description': edit_reference_flow_description,
                                 'system_boundaries': edit_boundaries,
                                 'system_boundaries_figure': project_to_edit.get('system_boundaries_figure'),  # Manter figura existente
                                 'product_system': edit_product,

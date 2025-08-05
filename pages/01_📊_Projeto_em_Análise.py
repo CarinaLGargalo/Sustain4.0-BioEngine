@@ -124,7 +124,15 @@ if selected_project:
     
     with col2:
         st.markdown(f"**📊 Level of Detail:** {selected_project.get('level_of_detail', 'N/A')}")
-        st.markdown(f"**🔄 Reference Flow:** {selected_project.get('reference_flow', 'N/A')}")
+        # Formatar Reference Flow com todas as informações
+        ref_flow = selected_project.get('reference_flow', 'N/A')
+        ref_unit = selected_project.get('reference_flow_unit', '')
+        ref_time = selected_project.get('reference_flow_description', '')
+        if ref_flow != 'N/A' and ref_unit and ref_time:
+            reference_flow_display = f"{ref_flow} {ref_unit}/{ref_time}"
+        else:
+            reference_flow_display = ref_flow
+        st.markdown(f"**🔄 Reference Flow:** {reference_flow_display}")
         st.markdown(f"**🏭 System Boundaries:** {selected_project.get('system_boundaries', 'N/A')}")
         st.markdown(f"**🎛️ Product/System:** {selected_project.get('product_system', 'N/A')}")
         st.markdown(f"**📐 Functional Unit:** {selected_project.get('functional_unit', 'N/A')}")
@@ -217,7 +225,15 @@ if selected_project:
         with scope_col1:
             st.write(f"**Product/System:** {selected_project.get('product_system', 'Not defined')}")
             st.write(f"**Functional Unit:** {selected_project.get('functional_unit', 'Not defined')}")
-            st.write(f"**Reference Flow:** {selected_project.get('reference_flow', 'Not defined')}")
+            # Formatar Reference Flow com todas as informações
+            ref_flow = selected_project.get('reference_flow', 'Not defined')
+            ref_unit = selected_project.get('reference_flow_unit', '')
+            ref_time = selected_project.get('reference_flow_description', '')
+            if ref_flow != 'Not defined' and ref_unit and ref_time:
+                reference_flow_display = f"{ref_flow} {ref_unit}/{ref_time}"
+            else:
+                reference_flow_display = ref_flow
+            st.write(f"**Reference Flow:** {reference_flow_display}")
             
         with scope_col2:
             st.write(f"**System Boundaries:** {selected_project.get('system_boundaries', 'Not defined')}")

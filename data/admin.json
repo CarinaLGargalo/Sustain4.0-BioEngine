@@ -1,29 +1,31 @@
 {
   "projects": [
     {
-      "name": "Super Mega Projeto",
-      "key_code": "604339",
-      "goal_statement": "Este é um projeto absurdamente grande, maior que todos os outros no mundo.",
-      "intended_application": "Vou usá-lo como minha arma secreta.",
-      "level_of_detail": "Detailed",
-      "type_of_lca": "Traditional",
-      "methodology": "Consequential",
-      "scale": "industrial",
-      "reference_flow": "Super Fluxo",
-      "system_boundaries": "cradle-to-cradle",
-      "system_boundaries_figure": "data\\figures\\admin_604339_Background.png",
+      "name": "a",
+      "key_code": "743826",
+      "goal_statement": "a",
+      "intended_application": "a",
+      "level_of_detail": "Screening",
+      "type_of_lca": "Prospective",
+      "methodology": "Attributional",
+      "scale": "lab",
+      "reference_flow": 8,
+      "reference_flow_unit": "kg",
+      "reference_flow_description": "hour",
+      "system_boundaries": "gate-to-gate",
+      "system_boundaries_figure": null,
       "product_system": "Option B - Food Products",
       "functional_unit": "kg of product",
-      "region": "Denmark",
-      "sharing_principle": "Economic Share",
-      "reason_sharing_principle": "Sou muito benevolente.",
-      "created_at": "2025-08-03 21:29:35"
+      "region": "Brazil",
+      "sharing_principle": "Equal per Capita",
+      "reason_sharing_principle": "a",
+      "created_at": "2025-08-05 11:09:28"
     }
   ],
   "preferences": {
     "theme": "Claro",
     "notifications": true
   },
-  "selected_project_index": 0,
-  "last_update": "2025-08-03 22:16:24"
+  "last_update": "2025-08-05 11:41:04",
+  "logout_time": "2025-08-05 11:41:04"
 }
