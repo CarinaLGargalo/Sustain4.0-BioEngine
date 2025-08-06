@@ -446,13 +446,9 @@ st.markdown('---')
 if 'show_project_form' not in st.session_state:
     st.session_state.show_project_form = False
 
-# Inicializar estados para edição e exclusão de projetos
+# Inicializar estados para exclusão de projetos
 if 'selected_project' not in st.session_state:
     st.session_state.selected_project = None
-if 'editing_project' not in st.session_state:
-    st.session_state.editing_project = None
-if 'show_edit_form' not in st.session_state:
-    st.session_state.show_edit_form = False
 if 'deleting_project' not in st.session_state:
     st.session_state.deleting_project = None
 if 'show_delete_confirm' not in st.session_state:
@@ -462,69 +458,108 @@ if 'show_delete_confirm' not in st.session_state:
 if st.session_state.show_project_form:
     st.subheader("Novo Projeto")
     st.write('Preencha os campos abaixo para configurar o seu novo projeto.')
-    with st.form(key="new_project_form"):
-        col1, col2 = st.columns(2)
-        
-        with col1:
+    
+    # Inicializar valores no session_state se não existirem
+    if 'form_product_system' not in st.session_state:
+        st.session_state.form_product_system = "Biofuels"
+    if 'form_functional_unit_unit' not in st.session_state:
+        st.session_state.form_functional_unit_unit = "L"
+    if 'form_functional_unit_object' not in st.session_state:
+        st.session_state.form_functional_unit_object = "biofuel"
+    
+    # Layout: Form à esquerda, campos dinâmicos à direita
+    form_col, dynamic_col = st.columns([2, 1])
+    
+    with form_col:
+        with st.form(key="new_project_form"):
             project_name = st.text_input("Project Name", placeholder="Digite um nome para o projeto")
             goal_statement = st.text_input("Goal Statement", placeholder="Declare o objetivo do estudo")
             intended_application = st.text_input("Intended Application", placeholder="Descreva a aplicação pretendida")
-            level_of_detail = st.selectbox("Level of Detail", 
-                                         ["Screening", "Streamlined", "Detailed"])
-            type_of_lca = st.selectbox("Type of LCA study", 
-                                     ["Prospective", "Traditional", "AESA"])
-            methodology = st.selectbox("Methodology", 
-                                     ["Attributional", "Consequential"])
-            scale = st.selectbox("Scale", 
-                               ["lab", "pilot", "industrial"])
-            colun1, colun2, colun3 = st.columns([1, 2, 2])
-            st.write("Reference Flow")
-            with colun1:
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                level_of_detail = st.selectbox("Level of Detail", 
+                                             ["Screening", "Streamlined", "Detailed"])
+                type_of_lca = st.selectbox("Type of LCA study", 
+                                         ["Prospective", "Traditional", "AESA"])
+            with col2:
+                methodology = st.selectbox("Methodology", 
+                                         ["Attributional", "Consequential"])
+                scale = st.selectbox("Scale", 
+                                   ["lab", "pilot", "industrial"])
+            
+            # Reference Flow
+            st.write("**Reference Flow**")
+            ref_col1, ref_col2, ref_col3 = st.columns([1, 2, 2])
+            with ref_col1:
                 reference_flow = st.number_input("Amount", placeholder="ex: 1000", min_value=0, step=1)
-            with colun2:
+            with ref_col2:
                 reference_flow_unit = st.selectbox("Unit", ["kg", "L", "m³", "MJ"])
-            with colun3:
-                reference_flow_description = st.selectbox("Time Unit", ["hour", "day", "month", "year"])
+            with ref_col3:
+                reference_flow_time_unit = st.selectbox("Time Unit", ["hour", "day", "month", "year"])
 
             system_boundaries = st.selectbox("System Boundaries", 
                                            ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"])
             
-        with col2:
             # Upload de figura para System Boundaries (opcional)
             system_boundaries_figure = st.file_uploader("System Boundaries Figure Upload (opcional)", 
                                                        type=['png', 'jpg', 'jpeg', 'pdf'], 
                                                        help="Faça upload de uma figura ilustrando as fronteiras do sistema")
             
-            product_system = st.selectbox("Product/system to be studied", 
-                                        ["Option A - Biofuels", "Option B - Food Products", "Option C - Building Materials", 
-                                         "Option D - Electronics", "Option E - Chemicals", "Option F - Energy Systems"])
-            
-            # Functional Unit baseado no Product/system selecionado
-            functional_unit_options = {
-                "Option A - Biofuels": ["L of biofuel", "MJ of energy", "kg of fuel", "km driven"],
-                "Option B - Food Products": ["kg of product", "1 meal", "kcal of energy", "protein content (g)"],
-                "Option C - Building Materials": ["m² of surface", "m³ of volume", "kg of material", "functional unit area"],
-                "Option D - Electronics": ["1 device", "year of use", "processing capacity", "storage capacity (GB)"],
-                "Option E - Chemicals": ["kg of chemical", "mol of substance", "L of solution", "functional dose"],
-                "Option F - Energy Systems": ["kWh generated", "MW capacity", "year of operation", "GJ of energy"]
-            }
-            
-            functional_unit = st.selectbox("Functional Unit", 
-                                         functional_unit_options.get(product_system, ["kg", "unit", "m²", "L"]))
-            
             region = st.selectbox("Region", 
                                 ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"])
             
-        # Absolute Sustainability Study expander
-        with st.expander("Absolute Sustainability Study?"):
-            sharing_principle = st.selectbox("Sharing Principle", 
-                                           ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"])
-            reason_sharing_principle = st.text_input("Reason for Sharing Principle", 
-                                                    placeholder="Explique a razão para o princípio de compartilhamento escolhido")
-            
-        submit_project = st.form_submit_button("Create", use_container_width=True)
+            # Absolute Sustainability Study expander
+            with st.expander("Absolute Sustainability Study?"):
+                sharing_principle = st.selectbox("Sharing Principle", 
+                                               ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"])
+                reason_sharing_principle = st.text_input("Reason for Sharing Principle", 
+                                                        placeholder="Explique a razão para o princípio de compartilhamento escolhido")
+                
+            submit_project = st.form_submit_button("Create", use_container_width=True)
+    
+    with dynamic_col:
+        st.markdown("### Configurações do Produto")
         
-        if submit_project:
+        # Product system fora do form para permitir reatividade
+        product_system = st.selectbox("Product/system to be studied", 
+                                    ["Biofuels", "Food Products", "Building Materials", 
+                                     "Electronics", "Chemicals", "Energy Systems"],
+                                    key="form_product_system")
+        
+        # Functional Unit também fora do form para reatividade
+        st.write("**Functional Unit**")
+        
+        # Options para Unit baseadas no product system
+        unit_options_by_product = {
+            "Biofuels": ["L", "MJ", "kg", "km"],
+            "Food Products": ["kg", "meal", "kcal", "g"],
+            "Building Materials": ["m²", "m³", "kg", "unit"],
+            "Electronics": ["device", "year", "unit", "GB"],
+            "Chemicals": ["kg", "mol", "L", "dose"],
+            "Energy Systems": ["kWh", "MW", "year", "GJ"]
+        }
+        
+        functional_unit_unit = st.selectbox("Unit", 
+                                          unit_options_by_product.get(product_system, ["kg", "unit", "m²", "L"]),
+                                          key="form_functional_unit_unit")
+        
+        # Options para Object baseadas no product system
+        object_options_by_product = {
+            "Biofuels": ["biofuel", "energy", "fuel", "driven"],
+            "Food Products": ["product", "meal", "energy", "protein content"],
+            "Building Materials": ["surface", "volume", "material", "functional unit area"],
+            "Electronics": ["device", "use", "processing capacity", "storage capacity"],
+            "Chemicals": ["chemical", "substance", "solution", "functional dose"],
+            "Energy Systems": ["generated", "capacity", "operation", "energy"]
+        }
+        
+        functional_unit_object = st.selectbox("Object", 
+                                            object_options_by_product.get(product_system, ["product", "service", "material", "energy"]),
+                                            key="form_functional_unit_object")
+    
+    # Processar submit do formulário
+    if submit_project:
             if not project_name:
                 st.error("Por favor, informe pelo menos o nome do projeto!")
             elif reference_flow <= 0:
@@ -567,11 +602,14 @@ if st.session_state.show_project_form:
                     'scale': scale,
                     'reference_flow': reference_flow,
                     'reference_flow_unit': reference_flow_unit,
-                    'reference_flow_description': reference_flow_description,
+                    'reference_flow_time_unit': reference_flow_time_unit,
                     'system_boundaries': system_boundaries,
                     'system_boundaries_figure': str(figure_path) if figure_path else None,
-                    'product_system': product_system,
-                    'functional_unit': functional_unit,
+                    'product_system': st.session_state.form_product_system,
+                    'functional_unit_unit': st.session_state.form_functional_unit_unit,
+                    'functional_unit_object': st.session_state.form_functional_unit_object,
+                    # Manter o campo antigo para compatibilidade
+                    'functional_unit': f"{st.session_state.form_functional_unit_unit} of {st.session_state.form_functional_unit_object}",
                     'region': region,
                     'sharing_principle': sharing_principle,
                     'reason_sharing_principle': reason_sharing_principle,
@@ -722,8 +760,8 @@ if not st.session_state.show_project_form:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
                 
-                # Botões de ação (mantendo a funcionalidade original)
-                col1, col2, col3 = st.columns([1, 1, 1])
+                # Botões de ação (removido botão editar)
+                col1, col2 = st.columns([1, 1])
                 
                 with col1:
                     # Botão para abrir o projeto na página de análise
@@ -748,16 +786,52 @@ if not st.session_state.show_project_form:
                         st.switch_page("pages/01_📊_Projeto_em_Análise.py")
                         
                 with col2:
-                    # Botão para editar o projeto
-                    if st.button("✏️ Editar", key=f"edit_project_{idx}", use_container_width=True):
-                        st.session_state.editing_project = idx
-                        st.session_state.show_edit_form = True
-                        
-                with col3:
                     # Botão para deletar o projeto
                     if st.button("🗑️ Excluir", key=f"delete_project_{idx}", use_container_width=True):
                         st.session_state.deleting_project = idx
                         st.session_state.show_delete_confirm = True
+                        st.rerun()
+                
+                # Confirmação de exclusão (se estiver excluindo este projeto específico)
+                if (st.session_state.get('show_delete_confirm') and 
+                    st.session_state.get('deleting_project') == idx):
+                    
+                    st.markdown("---")
+                    st.warning(f"⚠️ Tem certeza que deseja excluir o projeto '{project['name']}'?")
+                    
+                    confirm_col1, confirm_col2 = st.columns(2)
+                    with confirm_col1:
+                        if st.button("🗑️ Sim, Excluir", type="primary", use_container_width=True, key=f"confirm_delete_{idx}"):
+                            # Remover projeto
+                            st.session_state.user_projects[username].pop(idx)
+                            
+                            # Ajustar índice do projeto selecionado se necessário
+                            if st.session_state.selected_project == idx:
+                                st.session_state.selected_project = None
+                            elif st.session_state.selected_project is not None and st.session_state.selected_project > idx:
+                                st.session_state.selected_project -= 1
+                            
+                            # Salvar dados
+                            user_data = {
+                                'projects': st.session_state.user_projects[username],
+                                'preferences': {
+                                    'theme': st.session_state.theme,
+                                    'notifications': st.session_state.notifications
+                                },
+                                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            save_user_data(username, user_data)
+                            
+                            st.success("Projeto excluído com sucesso!")
+                            st.session_state.show_delete_confirm = False
+                            st.session_state.deleting_project = None
+                            st.rerun()
+                    
+                    with confirm_col2:
+                        if st.button("❌ Cancelar", use_container_width=True, key=f"cancel_delete_{idx}"):
+                            st.session_state.show_delete_confirm = False
+                            st.session_state.deleting_project = None
+                            st.rerun()
                 
                 st.markdown("<br>", unsafe_allow_html=True)  # Espaçamento entre cards
 
@@ -817,212 +891,3 @@ if not st.session_state.show_project_form:
                     }
                     save_user_data(username, user_data)
                     st.switch_page("pages/01_📊_Projeto_em_Análise.py")
-        
-        # Formulário de edição (se estiver editando)
-        if st.session_state.get('show_edit_form') and st.session_state.get('editing_project') is not None:
-            editing_idx = st.session_state.editing_project
-            if editing_idx < len(user_projects):
-                project_to_edit = user_projects[editing_idx]
-                
-                st.markdown("---")
-                st.markdown("### ✏️ Editar Projeto")
-                with st.form(key="edit_project_form"):
-                    # Campos básicos
-                    edit_name = st.text_input("Project Name", value=project_to_edit['name'])
-                    edit_goal = st.text_input("Goal Statement", value=project_to_edit.get('goal_statement', project_to_edit.get('description', '')))
-                    edit_application = st.text_input("Intended Application", value=project_to_edit.get('intended_application', ''))
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        # Tratamento seguro para selectbox com índices
-                        level_options = ["Screening", "Streamlined", "Detailed"]
-                        current_level = project_to_edit.get('level_of_detail', 'Screening')
-                        level_index = level_options.index(current_level) if current_level in level_options else 0
-                        edit_level = st.selectbox("Level of Detail", 
-                                                level_options,
-                                                index=level_index)
-                        
-                        lca_type_options = ["Prospective", "Traditional", "AESA"]
-                        current_lca_type = project_to_edit.get('type_of_lca', project_to_edit.get('type', 'Traditional'))
-                        lca_type_index = lca_type_options.index(current_lca_type) if current_lca_type in lca_type_options else 1
-                        edit_lca_type = st.selectbox("Type of LCA study", 
-                                                   lca_type_options,
-                                                   index=lca_type_index)
-                        
-                        methodology_options = ["Attributional", "Consequential"]
-                        current_methodology = project_to_edit.get('methodology', 'Attributional')
-                        methodology_index = methodology_options.index(current_methodology) if current_methodology in methodology_options else 0
-                        edit_methodology = st.selectbox("Methodology", 
-                                                       methodology_options,
-                                                       index=methodology_index)
-                        
-                        scale_options = ["lab", "pilot", "industrial"]
-                        current_scale = project_to_edit.get('scale', 'lab')
-                        scale_index = scale_options.index(current_scale) if current_scale in scale_options else 0
-                        edit_scale = st.selectbox("Scale", 
-                                                 scale_options,
-                                                 index=scale_index)
-                    with col2:
-                        # Reference Flow sem colunas aninhadas
-                        st.write("Reference Flow")
-                        edit_reference_flow = st.number_input("Amount", 
-                                                            value=float(project_to_edit.get('reference_flow', 0)), 
-                                                            min_value=0.0, step=1.0, key="edit_ref_flow")
-                        
-                        unit_options = ["kg", "L", "m³", "MJ"]
-                        current_unit = project_to_edit.get('reference_flow_unit', 'kg')
-                        unit_index = unit_options.index(current_unit) if current_unit in unit_options else 0
-                        edit_reference_flow_unit = st.selectbox("Unit", 
-                                                               unit_options,
-                                                               index=unit_index)
-                        
-                        time_options = ["hour", "day", "month", "year"]
-                        current_time = project_to_edit.get('reference_flow_description', 'day')
-                        time_index = time_options.index(current_time) if current_time in time_options else 1
-                        edit_reference_flow_description = st.selectbox("Time Unit", 
-                                                                      time_options,
-                                                                      index=time_index)
-                        
-                        boundaries_options = ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"]
-                        current_boundaries = project_to_edit.get('system_boundaries', 'gate-to-gate')
-                        boundaries_index = boundaries_options.index(current_boundaries) if current_boundaries in boundaries_options else 0
-                        edit_boundaries = st.selectbox("System Boundaries", 
-                                                      boundaries_options,
-                                                      index=boundaries_index)
-                        
-                        product_options = ["Option A - Biofuels", "Option B - Food Products", "Option C - Building Materials", 
-                                         "Option D - Electronics", "Option E - Chemicals", "Option F - Energy Systems"]
-                        current_product = project_to_edit.get('product_system', 'Option A - Biofuels')
-                        product_index = product_options.index(current_product) if current_product in product_options else 0
-                        edit_product = st.selectbox("Product/system to be studied", 
-                                                   product_options,
-                                                   index=product_index)
-                        
-                        region_options = ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"]
-                        current_region = project_to_edit.get('region', 'Brazil')
-                        region_index = region_options.index(current_region) if current_region in region_options else 0
-                        edit_region = st.selectbox("Region", 
-                                                  region_options,
-                                                  index=region_index)
-                    
-                    # Functional Unit baseado no Product/system selecionado
-                    functional_unit_options = {
-                        "Option A - Biofuels": ["L of biofuel", "MJ of energy", "kg of fuel", "km driven"],
-                        "Option B - Food Products": ["kg of product", "1 meal", "kcal of energy", "protein content (g)"],
-                        "Option C - Building Materials": ["m² of surface", "m³ of volume", "kg of material", "functional unit area"],
-                        "Option D - Electronics": ["1 device", "year of use", "processing capacity", "storage capacity (GB)"],
-                        "Option E - Chemicals": ["kg of chemical", "mol of substance", "L of solution", "functional dose"],
-                        "Option F - Energy Systems": ["kWh generated", "MW capacity", "year of operation", "GJ of energy"]
-                    }
-                    
-                    current_functional_unit = project_to_edit.get('functional_unit', 'kg of product')
-                    available_units = functional_unit_options.get(edit_product, ["kg", "unit", "m²", "L"])
-                    if current_functional_unit not in available_units:
-                        current_functional_unit = available_units[0]
-                    
-                    edit_functional_unit = st.selectbox("Functional Unit", 
-                                                       available_units,
-                                                       index=available_units.index(current_functional_unit))
-                    
-                    # Absolute Sustainability Study
-                    with st.expander("Absolute Sustainability Study?"):
-                        sharing_options = ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"]
-                        current_sharing = project_to_edit.get('sharing_principle', 'Equal per Capita')
-                        sharing_index = sharing_options.index(current_sharing) if current_sharing in sharing_options else 0
-                        edit_sharing = st.selectbox("Sharing Principle", 
-                                                   sharing_options,
-                                                   index=sharing_index)
-                        edit_reason_sharing = st.text_input("Reason for Sharing Principle", 
-                                                           value=project_to_edit.get('reason_sharing_principle', ''))
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if st.form_submit_button("💾 Salvar", use_container_width=True):
-                            # Atualizar projeto
-                            st.session_state.user_projects[username][editing_idx] = {
-                                'name': edit_name,
-                                'key_code': project_to_edit.get('key_code', '000000'),  # Manter código existente
-                                'goal_statement': edit_goal,
-                                'intended_application': edit_application,
-                                'level_of_detail': edit_level,
-                                'type_of_lca': edit_lca_type,
-                                'methodology': edit_methodology,
-                                'scale': edit_scale,
-                                'reference_flow': edit_reference_flow,
-                                'reference_flow_unit': edit_reference_flow_unit,
-                                'reference_flow_description': edit_reference_flow_description,
-                                'system_boundaries': edit_boundaries,
-                                'system_boundaries_figure': project_to_edit.get('system_boundaries_figure'),  # Manter figura existente
-                                'product_system': edit_product,
-                                'functional_unit': edit_functional_unit,
-                                'region': edit_region,
-                                'sharing_principle': edit_sharing,
-                                'reason_sharing_principle': edit_reason_sharing,
-                                'created_at': project_to_edit.get('created_at', pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")),
-                                'updated_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                            }
-                            
-                            # Salvar dados
-                            user_data = {
-                                'projects': st.session_state.user_projects[username],
-                                'preferences': {
-                                    'theme': st.session_state.theme,
-                                    'notifications': st.session_state.notifications
-                                },
-                                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                            }
-                            save_user_data(username, user_data)
-                            
-                            st.success("Projeto atualizado com sucesso!")
-                            st.session_state.show_edit_form = False
-                            st.session_state.editing_project = None
-                            st.rerun()
-                    
-                    with col2:
-                        if st.form_submit_button("❌ Cancelar", use_container_width=True):
-                            st.session_state.show_edit_form = False
-                            st.session_state.editing_project = None
-                            st.rerun()
-
-        # Confirmação de exclusão (se estiver excluindo)
-        if st.session_state.get('show_delete_confirm') and st.session_state.get('deleting_project') is not None:
-            deleting_idx = st.session_state.deleting_project
-            if deleting_idx < len(user_projects):
-                project_to_delete = user_projects[deleting_idx]
-                
-                st.markdown("---")
-                st.warning(f"⚠️ Tem certeza que deseja excluir o projeto '{project_to_delete['name']}'?")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("🗑️ Sim, Excluir", type="primary", use_container_width=True, key="confirm_delete_sidebar"):
-                        # Remover projeto
-                        st.session_state.user_projects[username].pop(deleting_idx)
-                        
-                        # Ajustar índice do projeto selecionado se necessário
-                        if st.session_state.selected_project == deleting_idx:
-                            st.session_state.selected_project = None
-                        elif st.session_state.selected_project is not None and st.session_state.selected_project > deleting_idx:
-                            st.session_state.selected_project -= 1
-                        
-                        # Salvar dados
-                        user_data = {
-                            'projects': st.session_state.user_projects[username],
-                            'preferences': {
-                                'theme': st.session_state.theme,
-                                'notifications': st.session_state.notifications
-                            },
-                            'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                        }
-                        save_user_data(username, user_data)
-                        
-                        st.success("Projeto excluído com sucesso!")
-                        st.session_state.show_delete_confirm = False
-                        st.session_state.deleting_project = None
-                        st.rerun()
-                
-                with col2:
-                    if st.button("❌ Cancelar", use_container_width=True, key="cancel_delete_sidebar"):
-                        st.session_state.show_delete_confirm = False
-                        st.session_state.deleting_project = None
-                        st.rerun()

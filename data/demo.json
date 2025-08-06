@@ -13,15 +13,35 @@
       "type": "Qualidade da Água",
       "date": "2025-07-15",
       "created_at": "2025-07-15 14:30:00"
+    },
+    {
+      "name": "ikjn",
+      "key_code": "478591",
+      "goal_statement": "",
+      "intended_application": "",
+      "level_of_detail": "Screening",
+      "type_of_lca": "Prospective",
+      "methodology": "Attributional",
+      "scale": "lab",
+      "reference_flow": 2.0,
+      "reference_flow_unit": "kg",
+      "reference_flow_time_unit": "hour",
+      "system_boundaries": "gate-to-gate",
+      "system_boundaries_figure": null,
+      "product_system": "Building Materials",
+      "functional_unit_unit": "m³",
+      "functional_unit_object": "volume",
+      "functional_unit": "m³ of volume",
+      "region": "Brazil",
+      "sharing_principle": "Equal per Capita",
+      "reason_sharing_principle": "kook",
+      "created_at": "2025-08-06 18:22:08",
+      "updated_at": "2025-08-06 18:22:32"
     }
   ],
   "preferences": {
     "theme": "Claro",
-    "notifications": true,
-    "default_chart_type": "Linhas",
-    "color_palette": "Sustentabilidade",
-    "data_density": 500,
-    "units": "Métrico"
+    "notifications": true
   },
-  "last_update": "2025-08-01 10:00:00"
+  "last_update": "2025-08-06 18:22:32"
 }
