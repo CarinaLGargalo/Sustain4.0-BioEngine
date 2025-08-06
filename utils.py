@@ -6,31 +6,31 @@ import yaml
 from yaml.loader import SafeLoader
 from pathlib import Path
 
-# Função para verificar autenticação
+# Function to check authentication
 def check_authentication():
-    """Verifica se o usuário está autenticado"""
+    """Checks if user is authenticated"""
     return st.session_state.get('authenticated', False)
 
-# Criar diretório de dados se não existir
+# Create data directory if it doesn't exist
 def ensure_data_dir():
-    """Garante que o diretório de dados exista"""
+    """Ensures that the data directory exists"""
     data_dir = Path("./data")
     if not data_dir.exists():
         data_dir.mkdir()
     return data_dir
 
-# Função para salvar dados do usuário
+# Function to save user data
 def save_user_data(username, data):
-    """Salva os dados do usuário em um arquivo JSON"""
+    """Saves user data to a JSON file"""
     data_dir = ensure_data_dir()
     user_file = data_dir / f"{username}.json"
     
     with open(user_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, default=str, ensure_ascii=False, indent=2)
         
-# Função para carregar dados do usuário
+# Function to load user data
 def load_user_data(username):
-    """Carrega os dados do usuário de um arquivo JSON"""
+    """Loads user data from a JSON file"""
     data_dir = ensure_data_dir()
     user_file = data_dir / f"{username}.json"
     
@@ -39,21 +39,21 @@ def load_user_data(username):
             with open(user_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            st.error(f"Erro ao carregar dados do usuário: {e}")
+            st.error(f"Error loading user data: {e}")
             return {}
     else:
         return {}
 
-# Função para carregar configuração
+# Function to load configuration
 @st.cache_data
 def load_config():
-    """Carrega a configuração de usuários do arquivo YAML"""
+    """Loads user configuration from YAML file"""
     try:
         with open('config.yaml') as file:
             config = yaml.load(file, Loader=SafeLoader)
         return config
     except FileNotFoundError:
-        # Configuração padrão se o arquivo não existir
+        # Default configuration if file doesn't exist
         return {
             'credentials': {'usernames': {}},
             'cookie': {
@@ -64,15 +64,15 @@ def load_config():
             'preauthorized': {'emails': []}
         }
 
-# Função para salvar configuração
+# Function to save configuration
 def save_config(config):
-    """Salva a configuração de usuários no arquivo YAML"""
+    """Saves user configuration to YAML file"""
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
 
-# Inicializar session state
+# Initialize session state
 def init_session_state():
-    """Inicializa variáveis de estado da sessão"""
+    """Initializes session state variables"""
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     if 'username' not in st.session_state:
@@ -82,22 +82,22 @@ def init_session_state():
     if 'notifications' not in st.session_state:
         st.session_state.notifications = True
     if 'theme' not in st.session_state:
-        st.session_state.theme = "Claro"
+        st.session_state.theme = "Light"
     if 'user_projects' not in st.session_state:
-        st.session_state.user_projects = {}  # Dicionário para armazenar projetos por username
+        st.session_state.user_projects = {}  # Dictionary to store projects by username
     if 'last_save_time' not in st.session_state:
         st.session_state.last_save_time = pd.Timestamp.now()
 
-# Função para carregar dados do usuário quando faz login
+# Function to load user data when logging in
 def load_user_data_on_login(username):
-    """Carrega os dados do usuário e atualiza a session_state"""
+    """Loads user data and updates session_state"""
     user_data = load_user_data(username)
     
-    # Carregar projetos
+    # Load projects
     if 'projects' in user_data:
         st.session_state.user_projects[username] = user_data['projects']
     
-    # Carregar projeto selecionado anteriormente (se existir)
+    # Load previously selected project (if it exists)
     if 'selected_project_index' in user_data:
         projects = st.session_state.user_projects.get(username, [])
         selected_idx = user_data['selected_project_index']
@@ -105,7 +105,7 @@ def load_user_data_on_login(username):
             st.session_state.selected_project = selected_idx
             st.session_state.current_project = projects[selected_idx]
     
-    # Carregar configurações pessoais
+    # Load personal settings
     if 'preferences' in user_data:
         preferences = user_data['preferences']
         if 'theme' in preferences:
@@ -113,27 +113,27 @@ def load_user_data_on_login(username):
         if 'notifications' in preferences:
             st.session_state.notifications = preferences['notifications']
     
-    # Carregar outras informações personalizadas
+    # Load other custom information
     if 'custom_data' in user_data:
         st.session_state.custom_data = user_data['custom_data']
 
-# Função para auto-salvar os dados do usuário
+# Function to auto-save user data
 def auto_save_user_data():
-    """Auto-salvar dados do usuário a cada 5 minutos"""
+    """Auto-save user data every 5 minutes"""
     if not st.session_state.get('username'):
         return
         
     current_time = pd.Timestamp.now()
     last_save = st.session_state.get('last_save_time', pd.Timestamp.now())
     
-    # Verifica se já passou pelo menos 5 minutos desde a última vez que salvamos
-    if (current_time - last_save).total_seconds() >= 300:  # 300 segundos = 5 minutos
+    # Check if at least 5 minutes have passed since the last save
+    if (current_time - last_save).total_seconds() >= 300:  # 300 seconds = 5 minutes
         username = st.session_state.username
         
-        # Recuperar os projetos existentes
+        # Retrieve existing projects
         user_projects = st.session_state.user_projects.get(username, [])
         
-        # Dados a serem salvos
+        # Data to be saved
         user_data = {
             'projects': user_projects,
             'preferences': {
@@ -144,6 +144,6 @@ def auto_save_user_data():
             'auto_saved': True
         }
         
-        # Salvar dados do usuário
+        # Save user data
         save_user_data(username, user_data)
         st.session_state.last_save_time = current_time

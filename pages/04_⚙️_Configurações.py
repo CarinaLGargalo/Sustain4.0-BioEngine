@@ -1,14 +1,14 @@
 import streamlit as st
 
-# Configuração da página (DEVE ser o primeiro comando do Streamlit)
+# Page configuration (MUST be the first Streamlit command)
 st.set_page_config(
-    page_title="Configurações - Sustain 4.0",
+    page_title="Settings - Sustain 4.0",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Importar outras bibliotecas depois da configuração da página
+# Import other libraries after page configuration
 import yaml
 from yaml.loader import SafeLoader
 import pandas as pd
@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 import sys
 
-# Background customizado com opacidade de 30%
+# Custom background with 30% opacity
 page_bg__img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -31,7 +31,7 @@ page_bg__img = """
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* Garantir que o conteúdo aparece sobre o fundo */
+/* Ensure content appears over the background */
 [data-testid="stToolbar"] {
     z-index: 1;
 }
@@ -39,54 +39,54 @@ page_bg__img = """
 """
 st.markdown(page_bg__img, unsafe_allow_html=True)
 
-# Adicionar diretório pai ao path para importar funções
+# Add parent directory to path to import functions
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import save_user_data
 
-# Verificação de autenticação
+# Authentication verification
 if not st.session_state.get('authenticated', False):
-    st.info("🔐Por favor, faça login na página principal.")
+    st.info("🔐Please login on the main page.")
     st.stop()
 
-# Importar funções adicionais
+# Import additional functions
 from utils import load_config, save_config
 
-st.header("Configurações")
+st.header("Settings")
 
-# Carregar configuração atual
+# Load current configuration
 config = load_config()
 
-# Criar abas para organizar as configurações
-tab1, tab2, tab3, tab4 = st.tabs(["🔒 Conta", "📊 Visualização", "🔧 Sistema", "📱 Notificações"])
+# Create tabs to organize settings
+tab1, tab2, tab3, tab4 = st.tabs(["🔒 Account", "📊 Visualization", "🔧 System", "📱 Notifications"])
 
 with tab1:
-    st.subheader("Configurações de Conta")
+    st.subheader("Account Settings")
     
-    # Exibir informações do usuário atual (se houver)
+    # Display current user information (if available)
     if 'username' in st.session_state:
-        st.info(f"Usuário atual: {st.session_state['username']}")
+        st.info(f"Current user: {st.session_state['username']}")
         
-        # Opção para alterar senha
-        with st.expander("Alterar senha"):
-            current_password = st.text_input("Senha atual", type="password")
-            new_password = st.text_input("Nova senha", type="password")
-            confirm_password = st.text_input("Confirmar nova senha", type="password")
+        # Option to change password
+        with st.expander("Change password"):
+            current_password = st.text_input("Current password", type="password")
+            new_password = st.text_input("New password", type="password")
+            confirm_password = st.text_input("Confirm new password", type="password")
             
-            if st.button("Atualizar senha"):
+            if st.button("Update password"):
                 if new_password != confirm_password:
-                    st.error("As senhas não correspondem.")
+                    st.error("Passwords don't match.")
                 elif len(new_password) < 6:
-                    st.error("A senha deve ter pelo menos 6 caracteres.")
+                    st.error("Password must be at least 6 characters long.")
                 else:
-                    # Aqui você implementaria a lógica para verificar a senha atual
-                    # e atualizar para a nova senha no config
-                    st.success("Senha alterada com sucesso!")
+                    # Here you would implement the logic to verify current password
+                    # and update to new password in config
+                    st.success("Password changed successfully!")
 
-    # Seção para gerenciar usuários (somente para administradores)
-    with st.expander("Gerenciar Usuários (Admin)"):
-        st.warning("Esta seção está disponível apenas para administradores.")
-        # Aqui você poderia adicionar uma verificação se o usuário é admin
-        # E então mostrar as opções de gerenciamento de usuários
+    # Section for managing users (administrators only)
+    with st.expander("Manage Users (Admin)"):
+        st.warning("This section is only available for administrators.")
+        # Here you could add a check if the user is admin
+        # And then show user management options
 
 with tab2:
     st.subheader("Configurações de Visualização")
@@ -99,55 +99,55 @@ with tab2:
         index=theme_options.index(config.get('theme', 'Sistema'))
     )
     
-    # Visualização de dados
-    st.subheader("Gráficos e Relatórios")
+    # Data visualization
+    st.subheader("Charts and Reports")
     
-    # Tipo de gráfico padrão
-    chart_types = ["Barras", "Linhas", "Dispersão", "Área", "Pizza"]
+    # Default chart type
+    chart_types = ["Bars", "Lines", "Scatter", "Area", "Pie"]
     default_chart = st.selectbox(
-        "Tipo de gráfico padrão", 
+        "Default chart type", 
         options=chart_types,
-        index=chart_types.index(config.get('default_chart_type', 'Barras'))
+        index=chart_types.index(config.get('default_chart_type', 'Bars')) if config.get('default_chart_type', 'Bars') in chart_types else 0
     )
     
-    # Paleta de cores
-    color_palettes = ["Viridis", "Magma", "Plasma", "Inferno", "Cividis", "Sustentabilidade"]
+    # Color palette
+    color_palettes = ["Viridis", "Magma", "Plasma", "Inferno", "Cividis", "Sustainability"]
     default_palette = st.selectbox(
-        "Paleta de cores para gráficos", 
+        "Color palette for charts", 
         options=color_palettes,
-        index=color_palettes.index(config.get('color_palette', 'Sustentabilidade'))
+        index=color_palettes.index(config.get('color_palette', 'Sustainability')) if config.get('color_palette', 'Sustainability') in color_palettes else 0
     )
     
-    # Densidade de dados
+    # Data density
     data_density = st.slider(
-        "Densidade de dados em gráficos", 
+        "Data density in charts", 
         min_value=50, 
         max_value=1000, 
         value=config.get('data_density', 500),
         step=50,
-        help="Número máximo de pontos a exibir em gráficos detalhados. Valores menores melhoram o desempenho."
+        help="Maximum number of points to display in detailed charts. Lower values improve performance."
     )
 
 with tab3:
-    st.subheader("Configurações do Sistema")
+    st.subheader("System Settings")
     
-    # Configuração do cache
-    cache_options = ["1 hora", "3 horas", "6 horas", "12 horas", "1 dia", "Sempre"]
+    # Cache configuration
+    cache_options = ["1 hour", "3 hours", "6 hours", "12 hours", "1 day", "Always"]
     cache_setting = st.selectbox(
-        "Duração do cache de dados", 
+        "Data cache duration", 
         options=cache_options,
-        index=cache_options.index(config.get('cache_duration', '1 hora'))
+        index=cache_options.index(config.get('cache_duration', '1 hour')) if config.get('cache_duration', '1 hour') in cache_options else 0
     )
     
-    # Unidades de medida
+    # Units of measurement
     units_system = st.radio(
-        "Sistema de unidades",
-        options=["Métrico", "Imperial"],
-        index=0 if config.get('units', 'Métrico') == 'Métrico' else 1
+        "Unit system",
+        options=["Metric", "Imperial"],
+        index=0 if config.get('units', 'Metric') == 'Metric' else 1
     )
     
-    # Configurações de backup
-    st.subheader("Backup de Dados")
+    # Backup settings
+    st.subheader("Data Backup")
     backup_frequency = st.selectbox(
         "Frequência de backup automático",
         options=["Desativado", "Diário", "Semanal", "Mensal"],
@@ -168,58 +168,58 @@ with tab3:
 with tab4:
     st.subheader("Configurações de Notificações")
     
-    # Ativar/desativar notificações
+    # Enable/disable notifications
     notifications_enabled = st.toggle(
-        "Ativar notificações",
+        "Enable notifications",
         value=config.get('notifications_enabled', True)
     )
     
     if notifications_enabled:
-        # Tipos de notificações
+        # Notification types
         notification_types = st.multiselect(
-            "Tipos de notificações",
-            options=["Alertas críticos", "Atualizações de dados", "Relatórios periódicos", "Novidades do sistema"],
-            default=config.get('notification_types', ["Alertas críticos"]),
+            "Notification types",
+            options=["Critical alerts", "Data updates", "Periodic reports", "System news"],
+            default=config.get('notification_types', ["Critical alerts"]),
         )
         
-        # Email para notificações
+        # Email for notifications
         email_notifications = st.toggle(
-            "Receber notificações por email",
+            "Receive email notifications",
             value=config.get('email_notifications', False)
         )
         
         if email_notifications:
             notification_email = st.text_input(
-                "Email para notificações",
+                "Email for notifications",
                 value=config.get('notification_email', '')
             )
             
-            frequency_options = ["Tempo real", "Resumo diário", "Resumo semanal"]
+            frequency_options = ["Real time", "Daily summary", "Weekly summary"]
             email_frequency = st.radio(
-                "Frequência de emails",
+                "Email frequency",
                 options=frequency_options,
-                index=frequency_options.index(config.get('email_frequency', 'Resumo diário'))
+                index=frequency_options.index(config.get('email_frequency', 'Daily summary')) if config.get('email_frequency', 'Daily summary') in frequency_options else 1
             )
 
-# Botão para salvar todas as configurações
-if st.button("Salvar todas as configurações", type="primary"):
-    # Atualizar valores de configuração
-    # Tema
+# Button to save all settings
+if st.button("Save all settings", type="primary"):
+    # Update configuration values
+    # Theme
     config['theme'] = selected_theme
     st.session_state.theme = selected_theme
     
-    # Visualização
+    # Visualization
     config['default_chart_type'] = default_chart
     config['color_palette'] = default_palette
     config['data_density'] = data_density
     
-    # Sistema
+    # System
     config['cache_duration'] = cache_setting
     config['units'] = units_system
     config['backup_frequency'] = backup_frequency
     config['backup_location'] = backup_location
     
-    # Notificações
+    # Notifications
     config['notifications_enabled'] = notifications_enabled
     st.session_state.notifications = notifications_enabled
     if notifications_enabled and 'notification_types' in locals():
@@ -231,20 +231,20 @@ if st.button("Salvar todas as configurações", type="primary"):
         if email_notifications and 'email_frequency' in locals():
             config['email_frequency'] = email_frequency
     
-    # Salvar no arquivo de configuração global
+    # Save to global configuration file
     try:
         save_config(config)
     except Exception as e:
-        st.error(f"Erro ao salvar configurações: {e}")
+        st.error(f"Error saving settings: {e}")
         
-    # Salvar as preferências do usuário em seu arquivo próprio
+    # Save user preferences to their own file
     if st.session_state.get('username'):
         username = st.session_state.username
         
-        # Recuperar os projetos existentes (se houver)
+        # Retrieve existing projects (if any)
         user_projects = st.session_state.user_projects.get(username, [])
         
-        # Montar o objeto de dados do usuário
+        # Build user data object
         user_data = {
             'projects': user_projects,
             'preferences': {

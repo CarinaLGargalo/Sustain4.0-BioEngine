@@ -8,7 +8,7 @@ import time
 import bcrypt
 from pathlib import Path
 
-# Configuração da página - DEVE ser o primeiro comando Streamlit
+# Page configuration - MUST be the first Streamlit command
 st.set_page_config(
     page_title="Sustain 4.0 - BioEngine",
     page_icon="🌿",
@@ -70,10 +70,10 @@ from utils import (
     auto_save_user_data
 )
 
-# Inicializar configuração e authenticator
+# Initialize configuration and authenticator
 config = load_config()
 
-# Criar o authenticator
+# Create the authenticator
 authenticator = stauth.Authenticate(
     credentials=config['credentials'],
     cookie_name=config['cookie']['name'], 
@@ -85,13 +85,13 @@ authenticator = stauth.Authenticate(
 init_session_state()
 
 def login_page():
-    """Exibe a página de login com streamlit-authenticator"""
+    """Displays the login page with streamlit-authenticator"""
     
-    # CSS personalizado para melhorar o visual da página de login
+    # Custom CSS to improve the login page visual
     st.markdown("""
     <style>
     
-    /* Título principal */
+    /* Main title */
     .main-title {
         background: linear-gradient(135deg, #2c3e50, #27ae60, #3498db);
         -webkit-background-clip: text;
@@ -104,7 +104,7 @@ def login_page():
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     
-    /* Estilo das abas */
+    /* Tab styles */
     .stTabs [data-baseweb="tab-list"] {
         gap: 0px;
         background: rgba(255,255,255,0.8);
@@ -133,7 +133,7 @@ def login_page():
         box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     }
     
-    /* Formulários */
+    /* Forms */
     .stForm {
         background: rgba(248, 249, 250, 0.9);
         border-radius: 15px;
@@ -160,7 +160,7 @@ def login_page():
         box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
     }
     
-    /* Botões */
+    /* Buttons */
     .stButton > button {
         border-radius: 12px !important;
         font-weight: 600 !important;
@@ -171,7 +171,7 @@ def login_page():
         letter-spacing: 0.5px !important;
     }
     
-    /* Botão primário */
+    /* Primary button */
     .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #3498db, #2ecc71) !important;
         color: white !important;
@@ -183,14 +183,14 @@ def login_page():
         box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
     }
     
-    /* Botão demo */
+    /* Demo button */
     .stButton > button:not([kind="primary"]) {
         background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
         color: white !important;
         box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3) !important;
     }
     
-    /* Mensagens */
+    /* Messages */
     .stSuccess {
         background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
         color: white !important;
@@ -218,7 +218,7 @@ def login_page():
         box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
     }
     
-    /* Descrição da plataforma */
+    /* Platform description */
     .platform-description {
         background: rgba(255, 255, 255, 0.9);
         border-radius: 15px;
@@ -231,7 +231,7 @@ def login_page():
         color: #2c3e50;
     }
     
-    /* Ícones e emojis */
+    /* Icons and emojis */
     .icon-enhancement {
         font-size: 1.2em;
         margin-right: 8px;
@@ -239,86 +239,86 @@ def login_page():
     </style>
     """, unsafe_allow_html=True)
     
-    # Criar layout com uma coluna central
+    # Create layout with a central column
     col1, center_col, col3 = st.columns([1, 2, 1])
     
-    # Todo o conteúdo vai na coluna central
+    # All content goes in the central column
     with center_col:
-        # Container principal com estilo personalizado
+        # Main container with custom style
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
         
-        # Título principal estilizado
+        # Styled main title
         st.markdown(
             '<h1 class="main-title">🌿 Sustain4.0 BioEngine</h1>',
             unsafe_allow_html=True
         )
         
-        # Criar abas para Login e Registro
-        tab1, tab2 = st.tabs(["Login", "Cadastro"])
+        # Create tabs for Login and Registration
+        tab1, tab2 = st.tabs(["Login", "Register"])
         
         with tab1:
             # Widget de login do streamlit-authenticator
             authenticator.login(location='main')
         
         if st.session_state["authentication_status"] == False:
-            st.error('❌ Username/password incorretos')
+            st.error('❌ Incorrect username/password')
         elif st.session_state["authentication_status"]:
             st.session_state.authenticated = True
             st.session_state.username = st.session_state["username"]
             st.session_state.user_name = st.session_state["name"]
             st.session_state.login_time = pd.Timestamp.now()
-            st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
+            st.session_state.balloons_shown = False  # Reset flag to allow showing balloons again
             
-            # Carregar dados do usuário
+            # Load user data
             load_user_data_on_login(st.session_state["username"])
-            st.rerun()  # Recarrega a página para mostrar o conteúdo principal
+            st.rerun()  # Reload page to show main content
         
-        # Botão Demo (acesso rápido) com estilo aprimorado
+        # Demo button (quick access) with improved style
         st.markdown("---")
-        st.markdown("### 🎯 Acesso Rápido")
-        if st.button("👁️ Demo - Explorar Plataforma", use_container_width=True):
+        st.markdown("### 🎯 Quick Access")
+        if st.button("👁️ Demo - Explore Platform", use_container_width=True):
             st.session_state.authenticated = True
             st.session_state.username = "demo"
             st.session_state.user_name = "Demo User"
             st.session_state.login_time = pd.Timestamp.now()
             st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
             
-            # Carregar dados do usuário demo
+            # Load demo user data
             load_user_data_on_login("demo")
             
             st.rerun()  # Recarrega a página para mostrar o conteúdo principal
     
         with tab2:
-            st.markdown("### Criar nova conta")
+            st.markdown("### Create new account")
             
             # Formulário customizado de registro
             with st.form("register_form"):
                 col_reg1, col_reg2 = st.columns(2)
                 
                 with col_reg1:
-                    new_name = st.text_input("👤 Nome Completo:", placeholder="Digite seu nome completo")
-                    new_username = st.text_input("🔑 Username:", placeholder="Escolha um nome de usuário único")
+                    new_name = st.text_input("👤 Full Name:", placeholder="Enter your full name")
+                    new_username = st.text_input("🔑 Username:", placeholder="Choose a unique username")
                 
                 with col_reg2:
-                    new_email = st.text_input("📧 Email:", placeholder="Digite seu email")
+                    new_email = st.text_input("📧 Email:", placeholder="Enter your email")
                     
-                new_password = st.text_input("🔒 Senha:", type="password", placeholder="Digite uma senha segura")
-                new_password_repeat = st.text_input("🔒 Confirmar Senha:", type="password", placeholder="Digite a senha novamente")
+                new_password = st.text_input("🔒 Password:", type="password", placeholder="Enter a secure password")
+                new_password_repeat = st.text_input("🔒 Confirm Password:", type="password", placeholder="Enter the password again")
             
-                submit_button = st.form_submit_button("🎉 Criar Conta", type="primary", use_container_width=True)
+                submit_button = st.form_submit_button("🎉 Create Account", type="primary", use_container_width=True)
                 
                 if submit_button:
                     # Validações
                     if not all([new_name, new_username, new_email, new_password, new_password_repeat]):
-                        st.error("❌ Por favor, preencha todos os campos!")
+                        st.error("❌ Please fill in all fields!")
                     elif new_password != new_password_repeat:
-                        st.error("❌ As senhas não coincidem!")
+                        st.error("❌ Passwords don't match!")
                     elif new_username in config['credentials']['usernames']:
-                        st.error("❌ Username já existe! Escolha outro.")
+                        st.error("❌ Username already exists! Choose another.")
                     elif len(new_password) < 6:
-                        st.error("❌ A senha deve ter pelo menos 6 caracteres!")
+                        st.error("❌ Password must be at least 6 characters long!")
                     else:
-                        # Adicionar novo usuário
+                        # Add new user
                         import bcrypt
                         hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                         
@@ -329,108 +329,106 @@ def login_page():
                             'password': hashed_password
                         }
                         
-                        # Salvar no arquivo
+                        # Save to file
                         save_config(config)
                         
-                        st.success("✅ Conta criada com sucesso!")
-                        st.info("🔄 Agora você pode fazer login na aba Login!")
+                        st.success("✅ Account created successfully!")
+                        st.info("🔄 Now you can login in the Login tab!")
 
-                        # Limpar cache para recarregar configuração
+                        # Clear cache to reload configuration
                         st.cache_data.clear()
                         
                         import time
                         time.sleep(2)
                         st.rerun()
 
-        # Fechar container principal
+        # Close main container
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Descrição da plataforma estilizada
+        # Styled platform description
         st.markdown("""
         <div class="platform-description">
-            <h4>🌍 Sobre a Plataforma</h4>
-            <p><strong>Sustain4.0 BioEngine</strong> é uma plataforma integrada de análise de sustentabilidade ambiental. 
-            Oferecemos uma interface intuitiva para pesquisadores e analistas ambientais, permitindo:</p>
+            <h4>🌍 About the Platform</h4>
+            <p><strong>Sustain4.0 BioEngine</strong> is an integrated environmental sustainability analysis platform. 
+            We offer an intuitive interface for researchers and environmental analysts, enabling:</p>
             <ul>
-                <li>🌿 <strong>Análises de biodiversidade</strong> - Monitoramento da vida selvagem</li>
-                <li>🌱 <strong>Monitoramento de carbono</strong> - Rastreamento de emissões</li>
-                <li>💧 <strong>Qualidade da água</strong> - Análise de recursos hídricos</li>
-                <li>🌱 <strong>Saúde do solo</strong> - Avaliação da fertilidade</li>
+                <li>🌿 <strong>Biodiversity analysis</strong> - Wildlife monitoring</li>
+                <li>🌱 <strong>Carbon monitoring</strong> - Emissions tracking</li>
+                <li>💧 <strong>Water quality</strong> - Water resource analysis</li>
+                <li>🌱 <strong>Soil health</strong> - Fertility assessment</li>
             </ul>
-            <p>Transforme dados ambientais em insights acionáveis para um futuro mais sustentável! 🚀</p>
+            <p>Transform environmental data into actionable insights for a more sustainable future! 🚀</p>
         </div>
         """, unsafe_allow_html=True)
 
-# Verificar autenticação antes de mostrar o conteúdo principal
+# Check authentication before showing main content
 if not check_authentication():
     login_page()
-    st.stop()  # Para a execução aqui se não estiver autenticado
+    st.stop()  # Stop execution here if not authenticated
 
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
+# Main application content
 
-# Conteúdo principal da aplicação
-
-# Auto-salvar dados do usuário
+# Auto-save user data
 
 auto_save_user_data()
 
-# Verificar se acabou de fazer login (apenas uma vez)
+# Check if just logged in (only once)
 current_time = pd.Timestamp.now()
 login_time = st.session_state.get('login_time')
 
-# Apenas mostrar os balões se:
-# 1. O usuário fez login recentemente (nos últimos 6 segundos)
-# 2. Ainda não mostramos os balões
+# Only show balloons if:
+# 1. User logged in recently (in the last 6 seconds)
+# 2. We haven't shown balloons yet
 if login_time and (current_time - login_time).total_seconds() < 5:
-    st.balloons()  # Efeito visual de celebração
+    st.balloons()  # Celebration visual effect
 
-# Aqui será colocado o cabeçalho com o nome do usuário e o botão de logout
+# Here will be placed the header with the user name and logout button
 
 colt1, colt2, colt3 = st.columns([7, 2, 1])
 
 with colt1:
-    st.subheader(f"🌿 Bem-vindo, {st.session_state.get('user_name', '')}!")
+    st.subheader(f"🌿 Welcome, {st.session_state.get('user_name', '')}!")
 
 with colt2:
-    # Botão para criar novo projeto
-    if st.button("🧭 Criar Novo Projeto", use_container_width=True):
+    # Button to create new project
+    if st.button("🧭 Create New Project", use_container_width=True):
         st.session_state.show_project_form = True
 
 with colt3:
-    # Botão de logout
+    # Logout button
     if st.button("Logout", use_container_width=True):
-        # Salvar os dados do usuário antes de deslogar
+        # Save user data before logging out
         username = st.session_state.username
         
-        # Recuperar os projetos existentes
+        # Retrieve existing projects
         user_projects = st.session_state.user_projects.get(username, [])
         
-        # Salvar dados do usuário antes de deslogar
+        # Save user data before logging out
         user_data = {
             'projects': user_projects,
             'preferences': {
@@ -441,31 +439,31 @@ with colt3:
             'logout_time': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Salvar dados
+        # Save data
         save_user_data(username, user_data)
         
-        # Limpar a sessão
+        # Clear session
         for key in list(st.session_state.keys()):
             del st.session_state[key]
             
-        # Reinicializar session state com valores padrão
+        # Reinitialize session state with default values
         init_session_state()
         
-        # Recarregar a página
+        # Reload the page
         st.rerun()
 
 st.markdown('---')
 
-# # Criar layout com duas colunas principais
+# # Create layout with two main columns
 # main_col1, main_col2 = st.columns([1, 1])
 
 # with main_col2:
 
-# Inicializar estados para criação de projeto
+# Initialize states for project creation
 if 'show_project_form' not in st.session_state:
     st.session_state.show_project_form = False
 
-# Inicializar estados para exclusão de projetos
+# Initialize states for project deletion
 if 'selected_project' not in st.session_state:
     st.session_state.selected_project = None
 if 'deleting_project' not in st.session_state:
@@ -473,12 +471,12 @@ if 'deleting_project' not in st.session_state:
 if 'show_delete_confirm' not in st.session_state:
     st.session_state.show_delete_confirm = False
 
-# Formulário de criação de projeto (se estiver criando)
+# Project creation form (if creating)
 if st.session_state.show_project_form:
-    st.subheader("Novo Projeto")
-    st.write('Preencha os campos abaixo para configurar o seu novo projeto.')
+    st.subheader("New Project")
+    st.write('Fill in the fields below to configure your new project.')
     
-    # Inicializar valores no session_state se não existirem
+    # Initialize values in session_state if they don't exist
     if 'form_product_system' not in st.session_state:
         st.session_state.form_product_system = "Biofuels"
     if 'form_functional_unit_unit' not in st.session_state:
@@ -486,14 +484,14 @@ if st.session_state.show_project_form:
     if 'form_functional_unit_object' not in st.session_state:
         st.session_state.form_functional_unit_object = "biofuel"
     
-    # Layout: Form à esquerda, campos dinâmicos à direita
+    # Layout: Form on the left, dynamic fields on the right
     form_col, dynamic_col = st.columns([2, 1])
     
     with form_col:
         with st.form(key="new_project_form"):
-            project_name = st.text_input("Project Name", placeholder="Digite um nome para o projeto")
-            goal_statement = st.text_input("Goal Statement", placeholder="Declare o objetivo do estudo")
-            intended_application = st.text_input("Intended Application", placeholder="Descreva a aplicação pretendida")
+            project_name = st.text_input("Project Name", placeholder="Enter a name for the project")
+            goal_statement = st.text_input("Goal Statement", placeholder="Declare the objective of the study")
+            intended_application = st.text_input("Intended Application", placeholder="Describe the intended application")
             
             col1, col2 = st.columns(2)
             with col1:
@@ -520,10 +518,10 @@ if st.session_state.show_project_form:
             system_boundaries = st.selectbox("System Boundaries", 
                                            ["gate-to-gate", "cradle-to-gate", "cradle-to-grave", "cradle-to-cradle"])
             
-            # Upload de figura para System Boundaries (opcional)
-            system_boundaries_figure = st.file_uploader("System Boundaries Figure Upload (opcional)", 
+            # System Boundaries Figure upload (optional)
+            system_boundaries_figure = st.file_uploader("System Boundaries Figure Upload (optional)", 
                                                        type=['png', 'jpg', 'jpeg', 'pdf'], 
-                                                       help="Faça upload de uma figura ilustrando as fronteiras do sistema")
+                                                       help="Upload a figure illustrating the system boundaries")
             
             region = st.selectbox("Region", 
                                 ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"])
@@ -533,23 +531,23 @@ if st.session_state.show_project_form:
                 sharing_principle = st.selectbox("Sharing Principle", 
                                                ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"])
                 reason_sharing_principle = st.text_input("Reason for Sharing Principle", 
-                                                        placeholder="Explique a razão para o princípio de compartilhamento escolhido")
+                                                        placeholder="Explain the reason for the chosen sharing principle")
                 
             submit_project = st.form_submit_button("Create", use_container_width=True)
     
     with dynamic_col:
-        st.markdown("### Configurações do Produto")
+        st.markdown("### Product Settings")
         
-        # Product system fora do form para permitir reatividade
+        # Product system outside the form to allow reactivity
         product_system = st.selectbox("Product/system to be studied", 
                                     ["Biofuels", "Food Products", "Building Materials", 
                                      "Electronics", "Chemicals", "Energy Systems"],
                                     key="form_product_system")
         
-        # Functional Unit também fora do form para reatividade
+        # Functional Unit also outside the form to allow reactivity
         st.write("**Functional Unit**")
         
-        # Options para Unit baseadas no product system
+        # Unit options based on the product system
         unit_options_by_product = {
             "Biofuels": ["L", "MJ", "kg", "km"],
             "Food Products": ["kg", "meal", "kcal", "g"],
@@ -563,7 +561,7 @@ if st.session_state.show_project_form:
                                           unit_options_by_product.get(product_system, ["kg", "unit", "m²", "L"]),
                                           key="form_functional_unit_unit")
         
-        # Options para Object baseadas no product system
+        # Object options based on the product system
         object_options_by_product = {
             "Biofuels": ["biofuel", "energy", "fuel", "driven"],
             "Food Products": ["product", "meal", "energy", "protein content"],
@@ -577,39 +575,42 @@ if st.session_state.show_project_form:
                                             object_options_by_product.get(product_system, ["product", "service", "material", "energy"]),
                                             key="form_functional_unit_object")
     
-    # Processar submit do formulário
+    # Process form submit
     if submit_project:
             if not project_name:
-                st.error("Por favor, informe pelo menos o nome do projeto!")
+                st.error("Please enter at least the project name!")
             elif reference_flow <= 0:
-                st.error("Por favor, informe um valor válido para o Reference Flow!")
+                st.error("Please enter a valid value for the Reference Flow!")
             else:
-                # Gerar key code aleatório de 6 dígitos
+                # Generate random 6-digit key code
                 import random
                 key_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
                 
-                # Criar novo projeto na session
+                # Create new project in session
                 username = st.session_state.username
                 
-                # Inicializar a lista de projetos do usuário se ainda não existir
+                # Initialize user's project list if it doesn't exist yet
                 if username not in st.session_state.user_projects:
                     st.session_state.user_projects[username] = []
                 
-                # Salvar figura se foi feito upload
+                # Save figure if uploaded
                 figure_path = None
                 if system_boundaries_figure is not None:
-                    # Criar diretório para salvar figuras se não existir
+                    # Create directory to save figures if it doesn't exist
                     figures_dir = Path("data/figures")
                     figures_dir.mkdir(exist_ok=True)
                     
-                    # Salvar arquivo com nome único
+                    # Save file with unique name
                     figure_filename = f"{username}_{key_code}_{system_boundaries_figure.name}"
                     figure_path = figures_dir / figure_filename
                     
                     with open(figure_path, "wb") as f:
+                        
+                
+                # Add the project to the user's list
                         f.write(system_boundaries_figure.getbuffer())
                 
-                # Adicionar o projeto à lista do usuário
+                # Add the project to the user's list
                 new_project = {
                     'name': project_name,
                     'key_code': key_code,
@@ -627,7 +628,7 @@ if st.session_state.show_project_form:
                     'product_system': st.session_state.form_product_system,
                     'functional_unit_unit': st.session_state.form_functional_unit_unit,
                     'functional_unit_object': st.session_state.form_functional_unit_object,
-                    # Manter o campo antigo para compatibilidade
+                    # Keep the old field for compatibility
                     'functional_unit': f"{st.session_state.form_functional_unit_unit} of {st.session_state.form_functional_unit_object}",
                     'region': region,
                     'sharing_principle': sharing_principle,
@@ -637,7 +638,7 @@ if st.session_state.show_project_form:
                 
                 st.session_state.user_projects[username].append(new_project)
                 
-                # Salvar dados do usuário
+                # Save user data
                 user_data = {
                     'projects': st.session_state.user_projects[username],
                     'preferences': {
@@ -648,26 +649,26 @@ if st.session_state.show_project_form:
                 }
                 save_user_data(username, user_data)
                 
-                st.success(f"Projeto '{project_name}' criado com sucesso! Código: {key_code}")
-                st.session_state.show_project_form = False  # Fechar formulário após salvar
-                st.rerun()  # Recarregar a página para mostrar o novo projeto
+                st.success(f"Project '{project_name}' created successfully! Code: {key_code}")
+                st.session_state.show_project_form = False  # Close form after saving
+                st.rerun()  # Reload page to show the new project
 
 
 if not st.session_state.show_project_form:
-    # Criar layout com duas colunas principais com separador: projetos à esquerda, retomar projeto à direita
+    # Create layout with two main columns with separator: projects on the left, resume project on the right
     main_col1, separator_col, main_col2 = st.columns([2, 0.1, 2])
 
     with main_col1:
-        st.subheader("Meus Projetos")
+        st.subheader("My Projects")
         username = st.session_state.username
         user_projects = st.session_state.user_projects.get(username, [])
 
-        # Inicializar estado para projeto selecionado
+        # Initialize state for selected project
         if 'selected_project' not in st.session_state:
             st.session_state.selected_project = None
 
         if not user_projects:
-            st.info("Você ainda não tem projetos. Crie um!")
+            st.info("You don't have any projects yet. Create one!")
         # CSS personalizado para melhorar o visual dos cards
         st.markdown("""
         <style>
@@ -711,7 +712,7 @@ if not st.session_state.show_project_form:
             border-left: 3px solid #28a745;
         }
         
-        /* Card Retomar Projeto */
+        /* Resume Project Card */
         .resume-project-card {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 20px;
@@ -764,32 +765,32 @@ if not st.session_state.show_project_form:
         </style>
         """, unsafe_allow_html=True)
         
-        # Exibir projetos em cards clicáveis aprimorados
+        # Display projects in enhanced clickable cards
         for idx, project in enumerate(user_projects):
             with st.container():
-                # HTML personalizado para o card
+                # Custom HTML for the card
                 card_html = f"""
                 <div class="project-card">
                     <div class="project-title">📁 {project['name']}</div>
-                    <div class="project-type">🔑 <strong>Código:</strong> {project.get('key_code', 'N/A')}</div>
+                    <div class="project-type">🔑 <strong>Code:</strong> {project.get('key_code', 'N/A')}</div>
                     <div class="project-type">🎯 <strong>Goal:</strong> {project.get('goal_statement', project.get('description', 'N/A'))}</div>
                     <div class="project-type">🔬 <strong>LCA Type:</strong> {project.get('type_of_lca', project.get('type', 'N/A'))}</div>
-                    <div class="project-date">📅 <strong>Criado em:</strong> {project.get('created_at', 'N/A')}</div>
+                    <div class="project-date">📅 <strong>Created on:</strong> {project.get('created_at', 'N/A')}</div>
                 </div>
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
                 
-                # Botões de ação (removido botão editar)
+                # Action buttons (removed edit button)
                 col1, col2 = st.columns([1, 1])
                 
                 with col1:
-                    # Botão para abrir o projeto na página de análise
-                    if st.button("✅ Iniciar", key=f"open_project_{idx}", use_container_width=True):
-                        # Salvar projeto selecionado no session state
+                    # Button to open project on analysis page
+                    if st.button("✅ Start", key=f"open_project_{idx}", use_container_width=True):
+                        # Save selected project in session state
                         st.session_state.selected_project = idx
                         st.session_state.current_project = user_projects[idx]
                         
-                        # Salvar dados do usuário antes de navegar
+                        # Save user data before navigating
                         user_data = {
                             'projects': st.session_state.user_projects[username],
                             'preferences': {
@@ -801,36 +802,36 @@ if not st.session_state.show_project_form:
                         }
                         save_user_data(username, user_data)
                         
-                        # Redirecionar para a página de análise
+                        # Redirect to analysis page
                         st.switch_page("pages/01_📊_Projeto_em_Análise.py")
                         
                 with col2:
-                    # Botão para deletar o projeto
-                    if st.button("🗑️ Excluir", key=f"delete_project_{idx}", use_container_width=True):
+                    # Button to delete project
+                    if st.button("🗑️ Delete", key=f"delete_project_{idx}", use_container_width=True):
                         st.session_state.deleting_project = idx
                         st.session_state.show_delete_confirm = True
                         st.rerun()
                 
-                # Confirmação de exclusão (se estiver excluindo este projeto específico)
+                # Delete confirmation (if deleting this specific project)
                 if (st.session_state.get('show_delete_confirm') and 
                     st.session_state.get('deleting_project') == idx):
                     
                     st.markdown("---")
-                    st.warning(f"⚠️ Tem certeza que deseja excluir o projeto '{project['name']}'?")
+                    st.warning(f"⚠️ Are you sure you want to delete the project '{project['name']}'?")
                     
                     confirm_col1, confirm_col2 = st.columns(2)
                     with confirm_col1:
-                        if st.button("🗑️ Sim, Excluir", type="primary", use_container_width=True, key=f"confirm_delete_{idx}"):
-                            # Remover projeto
+                        if st.button("🗑️ Yes, Delete", type="primary", use_container_width=True, key=f"confirm_delete_{idx}"):
+                            # Remove project
                             st.session_state.user_projects[username].pop(idx)
                             
-                            # Ajustar índice do projeto selecionado se necessário
+                            # Adjust selected project index if necessary
                             if st.session_state.selected_project == idx:
                                 st.session_state.selected_project = None
                             elif st.session_state.selected_project is not None and st.session_state.selected_project > idx:
                                 st.session_state.selected_project -= 1
                             
-                            # Salvar dados
+                            # Save data
                             user_data = {
                                 'projects': st.session_state.user_projects[username],
                                 'preferences': {
@@ -841,20 +842,20 @@ if not st.session_state.show_project_form:
                             }
                             save_user_data(username, user_data)
                             
-                            st.success("Projeto excluído com sucesso!")
+                            st.success("Project deleted successfully!")
                             st.session_state.show_delete_confirm = False
                             st.session_state.deleting_project = None
                             st.rerun()
                     
                     with confirm_col2:
-                        if st.button("❌ Cancelar", use_container_width=True, key=f"cancel_delete_{idx}"):
+                        if st.button("❌ Cancel", use_container_width=True, key=f"cancel_delete_{idx}"):
                             st.session_state.show_delete_confirm = False
                             st.session_state.deleting_project = None
                             st.rerun()
                 
-                st.markdown("<br>", unsafe_allow_html=True)  # Espaçamento entre cards
+                st.markdown("<br>", unsafe_allow_html=True)  # Spacing between cards
 
-    # Coluna separadora com linha vertical
+    # Separator column with vertical line
     with separator_col:
         if st.session_state.selected_project is not None:    
             st.markdown("""
@@ -874,30 +875,30 @@ if not st.session_state.show_project_form:
             """, unsafe_allow_html=True)
 
     with main_col2:
-        # Mostrar "Retomar Projeto" apenas quando houver um projeto selecionado
+        # Show "Resume Project" only when there is a selected project
         if st.session_state.selected_project is not None:
-            st.subheader("Recentes")
+            st.subheader("Recent")
             selected_idx = st.session_state.selected_project
             if selected_idx < len(user_projects):
                 selected_project = user_projects[selected_idx]
                 
-                # HTML personalizado para o card de retomar projeto
+                # Custom HTML for resume project card
                 resume_card_html = f"""
                 <div class="resume-project-card">
                     <div class="resume-project-name">📁 {selected_project['name']}</div>
-                    <div class="resume-project-info">🔑 <strong>Código:</strong> {selected_project.get('key_code', 'N/A')}</div>
+                    <div class="resume-project-info">🔑 <strong>Code:</strong> {selected_project.get('key_code', 'N/A')}</div>
                     <div class="resume-project-info">🎯 <strong>Goal:</strong> {selected_project.get('goal_statement', selected_project.get('description', 'N/A'))}</div>
                     <div class="resume-project-info">🔬 <strong>LCA Type:</strong> {selected_project.get('type_of_lca', selected_project.get('type', 'N/A'))}</div>
                     <div class="resume-project-info">⚖️ <strong>Methodology:</strong> {selected_project.get('methodology', 'N/A')}</div>
                     <div class="resume-project-info">🌍 <strong>Region:</strong> {selected_project.get('region', 'N/A')}</div>
-                    {f'<div class="resume-created-at">Criado em: {selected_project["created_at"]}</div>' if selected_project.get('created_at') else ''}
+                    {f'<div class="resume-created-at">Created on: {selected_project["created_at"]}</div>' if selected_project.get('created_at') else ''}
                 </div>
                 """
                 st.markdown(resume_card_html, unsafe_allow_html=True)
                 
-                # Botão de ação centralizado
-                if st.button("🔄️ Retomar Projeto", use_container_width=True, key="analysis_active", type="secondary"):
-                    # Abrir projeto na página de análise
+                # Centered action button
+                if st.button("🔄️ Resume Project", use_container_width=True, key="analysis_active", type="secondary"):
+                    # Open project on analysis page
                     st.session_state.current_project = selected_project
                     user_data = {
                         'projects': st.session_state.user_projects[username],

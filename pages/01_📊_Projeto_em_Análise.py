@@ -1,14 +1,14 @@
 import streamlit as st
 
-# Configuração da página (DEVE ser o primeiro comando do Streamlit)
+# Page configuration (MUST be the first Streamlit command)
 st.set_page_config(
-    page_title="Projeto em Análise - Sustain 4.0",
+    page_title="Project Analysis - Sustain 4.0",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Importar outras bibliotecas depois da configuração da página
+# Import other libraries after page configuration
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 import sys
 import os
 
-# Background customizado com opacidade de 30%
+# Custom background with 30% opacity
 page_bg__img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -30,12 +30,12 @@ page_bg__img = """
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* Garantir que o conteúdo aparece sobre o fundo */
+/* Ensure content appears over the background */
 [data-testid="stToolbar"] {
     z-index: 1;
 }
 
-/* Estilo para expander com fundo branco */
+/* Style for expander with white background */
 .stExpander {
     background-color: white !important;
     border-radius: 8px !important;
@@ -57,86 +57,86 @@ page_bg__img = """
 """
 st.markdown(page_bg__img, unsafe_allow_html=True)
 
-# Importar funções do módulo de utilitários
+# Import functions from utilities module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import check_authentication
 
-# Verificação de autenticação
+# Authentication verification
 if not st.session_state.get('authenticated', False):
-    st.info("🔐 Por favor, faça login na página principal.")
+    st.info("🔐 Please login on the main page.")
     st.stop()
 
-# Verificar se há projetos disponíveis
+# Check if there are available projects
 username = st.session_state.username
 user_projects = st.session_state.user_projects.get(username, [])
 
 if not user_projects:
-    st.warning("Você ainda não tem projetos. Crie um projeto na página principal.")
+    st.warning("You don't have any projects yet. Create a project on the main page.")
     st.stop()
 
-# Verificar se há um projeto pré-selecionado da página principal
+# Check if there is a pre-selected project from the main page
 selected_project = None
 selected_project_name = None
 
 if st.session_state.get('current_project'):
-    # Usar projeto selecionado da página principal
+    # Use project selected from main page
     selected_project = st.session_state.current_project
     selected_project_name = selected_project['name']
 else:
-    # Selecionar projeto manualmente
+    # Select project manually
     project_names = [project['name'] for project in user_projects]
-    selected_project_name = st.selectbox("Selecione um projeto para análise:", project_names)
+    selected_project_name = st.selectbox("Select a project for analysis:", project_names)
     
-    # Encontrar o projeto selecionado
+    # Find the selected project
     selected_project = next((p for p in user_projects if p['name'] == selected_project_name), None)
     
-    # Salvar no session state
+    # Save in session state
     if selected_project:
         st.session_state.current_project = selected_project
 
-# Cabeçalho da página com nome do projeto
+# Page header with project name
 col1, col2, col3, col4 = st.columns([4, 1, 1, 1])
 
 with col1:
     if selected_project_name:
         st.header(f"📊 {selected_project_name}")
     else:
-        st.header("📊 Projeto em Análise")
+        st.header("📊 Project Analysis")
 
 with col2:
-    # Espaçamento
+    # Spacing
     st.write("")
 
 with col3:
-    # Botão para editar projeto (apenas se houver projeto selecionado)
+    # Button to edit project (only if there is a selected project)
     if st.session_state.get('current_project'):
-        if st.button("✏️ Editar Projeto", use_container_width=True):
+        if st.button("✏️ Edit Project", use_container_width=True):
             st.session_state.show_edit_form = True
 
 with col4:
-    # Botão para voltar à página principal
-    if st.button("🏠 Voltar ao Início", use_container_width=True):
+    # Button to return to main page
+    if st.button("🏠 Back to Home", use_container_width=True):
         st.switch_page("streamlit_app.py")
 
 st.markdown('---')
 
-# Mostrar informações do projeto se selecionado
+# Show project information if selected
 if st.session_state.get('current_project'):
     selected_project = st.session_state.current_project
     selected_project_name = selected_project['name']
 
-# Verificar se temos um projeto selecionado para análise
+# Check if we have a selected project for analysis
 if selected_project:
-    # Mostrar informações do projeto apenas se NÃO estivermos editando
+    # Show project information only if we are NOT editing
     if not st.session_state.get('show_edit_form', False):
-        # Exibir informações do projeto
-        st.subheader(f"Informações do Projeto")
+        # Display project information
+        st.subheader(f"Project Information")
         
-        # Informações básicas do projeto LCA em 3 colunas
+        # Basic LCA project information in 3 columns
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown(f"**🔑 Código do Projeto:** {selected_project.get('key_code', 'N/A')}")
+            st.markdown(f"**🔑 Project Code:** {selected_project.get('key_code', 'N/A')}")
             st.markdown(f"**🎯 Goal Statement:** {selected_project.get('goal_statement', selected_project.get('description', 'N/A'))}")
             st.markdown(f"**📋 Intended Application:** {selected_project.get('intended_application', 'N/A')}")
             st.markdown(f"**📊 Type of LCA Study:** {selected_project.get('type_of_lca', selected_project.get('type', 'N/A'))}")
@@ -145,10 +145,10 @@ if selected_project:
         with col2:
             st.markdown(f"**📏 Scale:** {selected_project.get('scale', 'N/A')}")
             st.markdown(f"**📊 Level of Detail:** {selected_project.get('level_of_detail', 'N/A')}")
-            # Formatar Reference Flow com todas as informações
+            # Format Reference Flow with all information
             ref_flow = selected_project.get('reference_flow', 'N/A')
             ref_unit = selected_project.get('reference_flow_unit', '')
-            # Compatibilidade com projetos antigos que usavam 'reference_flow_description'
+            # Compatibility with old projects that used 'reference_flow_description'
             ref_time = selected_project.get('reference_flow_time_unit') or selected_project.get('reference_flow_description', '')
             if ref_flow != 'N/A' and ref_unit and ref_time:
                 reference_flow_display = f"{ref_flow} {ref_unit}/{ref_time}"
@@ -159,18 +159,18 @@ if selected_project:
             st.markdown(f"**🎛️ Product/System:** {selected_project.get('product_system', 'N/A')}")
         
         with col3:
-            # Exibir Functional Unit - compatibilidade com projetos antigos e novos
+            # Display Functional Unit - compatibility with old and new projects
             functional_unit_unit = selected_project.get('functional_unit_unit')
             functional_unit_object = selected_project.get('functional_unit_object')
             if functional_unit_unit and functional_unit_object:
                 functional_unit_display = f"{functional_unit_unit} of {functional_unit_object}"
             else:
-                # Compatibilidade com projetos antigos
+                # Compatibility with old projects
                 functional_unit_display = selected_project.get('functional_unit', 'N/A')
             st.markdown(f"**📐 Functional Unit:** {functional_unit_display}")
             st.markdown(f"**🌍 Region:** {selected_project.get('region', 'N/A')}")
             
-            # Informações de Absolute Sustainability (se aplicável)
+            # Absolute Sustainability information (if applicable)
             if selected_project.get('sharing_principle') and selected_project.get('reason_sharing_principle'):
                 st.markdown("**🌱 Absolute Sustainability Study:** Yes")
                 st.markdown(f"**📊 Sharing Principle:** {selected_project.get('sharing_principle', 'N/A')}")
@@ -180,25 +180,25 @@ if selected_project:
                 st.markdown("")
                 st.markdown("")
         
-        # Inicializar estado para LCI se não existir
+        # Initialize state for LCI if it doesn't exist
         if 'lci_started' not in st.session_state:
             st.session_state.lci_started = {}
         
-        # Verificar se o LCI foi iniciado para este projeto
+        # Check if LCI was started for this project
         project_key = selected_project.get('key_code', selected_project['name'])
         lci_initiated = st.session_state.lci_started.get(project_key, False)
         
-        # Verificar se já existe dados de LCI salvos no projeto
+        # Check if LCI data already exists saved in the project
         has_lci_data = selected_project.get('lci_data') is not None
         
-        # Seção Continue to LCI / LCI Data
+        # Continue to LCI / LCI Data section
         st.markdown("---")
         
         if not lci_initiated and not has_lci_data:
-            # Mostrar seção de desbloqueio para LCI com visual de progresso
+            # Show LCI unlock section with progress visual
             st.markdown("### 📋 Life Cycle Inventory (LCI)")
             
-            # Container sutil com estilo elegante para a fase de desbloqueio
+            # Subtle container with elegant style for the unlock phase
             st.markdown("""
             <div style="
                 background: linear-gradient(135deg, #f8f9fd 0%, #f0f4f7 100%);
@@ -228,31 +228,31 @@ if selected_project:
             </div>
             """, unsafe_allow_html=True)
             
-            # Botão principal de desbloqueio com estilo especial
+            # Main unlock button with special style
 
             if st.button("Continue to LCI", use_container_width=True, type="primary", key="unlock_lci_btn"):
                 st.session_state.lci_started[project_key] = True
-                # Mostrar animação de desbloqueio
+                # Show unlock animation
                 st.balloons()
                 st.success("🎉 LCI Phase Unlocked! Welcome to Phase 2!")
                 import time
-                time.sleep(2)  # Pequena pausa para animação
+                time.sleep(2)  # Short pause for animation
                 st.rerun()
         
         else:
-            # Mostrar seção de LCI com sistema de níveis
+            # Show LCI section with level system
             st.markdown("### 📋 Life Cycle Inventory (LCI)")
             
-            # Inicializar nível do usuário se não existir
+            # Initialize user level if it doesn't exist
             if 'user_lci_level' not in st.session_state:
                 st.session_state.user_lci_level = {}
             
             if project_key not in st.session_state.user_lci_level:
-                st.session_state.user_lci_level[project_key] = 0  # Nível padrão
+                st.session_state.user_lci_level[project_key] = 0  # Default level
             
             current_level = st.session_state.user_lci_level[project_key]
             
-            # Interface para seleção de nível
+            # Interface for level selection
             st.markdown("#### 🎯 LCI Assessment Level")
             
             level_descriptions = {
@@ -262,7 +262,7 @@ if selected_project:
                 3: "**Level 3** - I know the process and have all necessary flow data"
             }
             
-            # Mostrar descrições dos níveis em cards
+            # Show level descriptions in cards
             for level, description in level_descriptions.items():
                 if level == current_level:
                     st.success(f"✅ Current Level: {description}")
@@ -271,7 +271,7 @@ if selected_project:
             
             st.markdown("---")
             
-            # Seletor de nível
+            # Level selector
             col_level1, col_level2 = st.columns([2, 1])
             
             with col_level1:
@@ -290,10 +290,10 @@ if selected_project:
                     key=f"lci_level_selector_{project_key}"
                 )
                 
-                # Extrair o número do nível selecionado
+                # Extract the selected level number
                 selected_level = int(selected_level_text.split()[1])
                 
-                # Atualizar nível se mudou
+                # Update level if changed
                 if selected_level != current_level:
                     st.session_state.user_lci_level[project_key] = selected_level
                     st.rerun()
@@ -311,7 +311,7 @@ if selected_project:
             
             st.markdown("---")
             
-            # Botões baseados no nível atual
+            # Buttons based on current level
             col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
             
             with col_btn2:
@@ -331,7 +331,7 @@ if selected_project:
                     if st.button("➕ Add Your LCI Data", use_container_width=True, type="primary"):
                         st.info("🚧 LCI data input functionality will be available soon!")
             
-            # Informações adicionais baseadas no nível
+            # Additional information based on level
             st.markdown("---")
             st.markdown("#### 💡 Next Steps")
             
@@ -373,15 +373,15 @@ if selected_project:
 
         st.markdown("---")
 
-        # Mostrar figura do System Boundaries se disponível
+        # Show System Boundaries figure if available
         if selected_project.get('system_boundaries_figure'):
             with st.expander("**System Boundaries Figure**"):
                 try:
                     st.image(selected_project['system_boundaries_figure'], caption="System Boundaries Diagram")
                 except:
-                    st.info("Figura salva mas não pode ser exibida no momento.")
+                    st.info("Figure saved but cannot be displayed at the moment.")
 
-        # Seção para notas e observações
+        # Section for notes and observations
         st.write("### 📝 Project Notes & Observations")
         
         if 'notes' not in st.session_state:
@@ -391,28 +391,28 @@ if selected_project:
             st.session_state.notes[selected_project_name] = ""
         
         notes = st.text_area(
-            "Adicione observações sobre este projeto:",
+            "Add observations about this project:",
             value=st.session_state.notes[selected_project_name],
             height=150
         )
         
         if notes != st.session_state.notes[selected_project_name]:
             st.session_state.notes[selected_project_name] = notes
-            st.success("Observações salvas!")
+            st.success("Observations saved!")
 
-# Inicializar estado para edição se não existir
+# Initialize state for editing if it doesn't exist
 if 'show_edit_form' not in st.session_state:
     st.session_state.show_edit_form = False
 
-# Formulário de edição (se estiver editando)
+# Edit form (if editing)
 if st.session_state.get('show_edit_form') and selected_project:
     
-    # Importar funções necessárias do utils
+    # Import necessary functions from utils
     from utils import save_user_data
     
-    # Inicializar valores no session_state para edição se não existirem
+    # Initialize values in session_state for editing if they don't exist
     if 'edit_product_system' not in st.session_state:
-        # Mapear valores antigos para novos valores simplificados
+        # Map old values to new simplified values
         current_product = selected_project.get('product_system', 'Biofuels')
         product_mapping = {
             "Option A - Biofuels": "Biofuels",
@@ -424,7 +424,7 @@ if st.session_state.get('show_edit_form') and selected_project:
         }
         st.session_state.edit_product_system = product_mapping.get(current_product, current_product)
     if 'edit_functional_unit_unit' not in st.session_state:
-        # Verificar se tem os campos separados, senão tentar extrair do campo funcional_unit antigo
+        # Check if it has separate fields, otherwise try to extract from old functional_unit field
         if selected_project.get('functional_unit_unit'):
             st.session_state.edit_functional_unit_unit = selected_project['functional_unit_unit']
         else:
@@ -448,20 +448,20 @@ if st.session_state.get('show_edit_form') and selected_project:
             except:
                 st.session_state.edit_functional_unit_object = 'product'
     
-    # Layout: Form à esquerda, campos dinâmicos à direita
+    # Layout: Form on left, dynamic fields on right
     edit_form_col, edit_dynamic_col = st.columns([2, 1])
     
     with edit_form_col:
         with st.form(key="edit_project_form_analysis", border=False):
-            st.markdown("### ✏️ Editar Projeto")
-            # Campos básicos
+            st.markdown("### ✏️ Edit Project")
+            # Basic fields
             edit_name = st.text_input("Project Name", value=selected_project['name'])
             edit_goal = st.text_input("Goal Statement", value=selected_project.get('goal_statement', selected_project.get('description', '')))
             edit_application = st.text_input("Intended Application", value=selected_project.get('intended_application', ''))
             
             col1, col2 = st.columns(2)
             with col1:
-                # Tratamento seguro para selectbox com índices
+                # Safe handling for selectbox with indices
                 level_options = ["Screening", "Streamlined", "Detailed"]
                 current_level = selected_project.get('level_of_detail', 'Screening')
                 level_index = level_options.index(current_level) if current_level in level_options else 0
@@ -504,7 +504,7 @@ if st.session_state.get('show_edit_form') and selected_project:
                                                        index=unit_index)
                 
                 time_options = ["hour", "day", "month", "year"]
-                # Compatibilidade com projetos antigos que usavam 'reference_flow_description'
+                # Compatibility with old projects that used 'reference_flow_description'
                 current_time = selected_project.get('reference_flow_time_unit') or selected_project.get('reference_flow_description', 'day')
                 time_index = time_options.index(current_time) if current_time in time_options else 1
                 edit_reference_flow_time_unit = st.selectbox("Time Unit", 
@@ -536,23 +536,23 @@ if st.session_state.get('show_edit_form') and selected_project:
                 edit_reason_sharing = st.text_input("Reason for Sharing Principle", 
                                                    value=selected_project.get('reason_sharing_principle', ''))
             
-            # Botões do formulário sem aninhamento de colunas
-            submit_edit = st.form_submit_button("💾 Salvar Alterações", use_container_width=True)
-            cancel_edit = st.form_submit_button("❌ Cancelar", use_container_width=True)
+            # Form buttons without column nesting
+            submit_edit = st.form_submit_button("💾 Save Changes", use_container_width=True)
+            cancel_edit = st.form_submit_button("❌ Cancel", use_container_width=True)
     
     with edit_dynamic_col:
-        st.markdown("### Configurações do Produto")
+        st.markdown("### Product Settings")
         
-        # Product system fora do form para permitir reatividade
+        # Product system outside form to allow reactivity
         edit_product = st.selectbox("Product/system to be studied", 
                                     ["Biofuels", "Food Products", "Building Materials", 
                                      "Electronics", "Chemicals", "Energy Systems"],
                                     key="edit_product_system")
         
-        # Functional Unit também fora do form para reatividade
+        # Functional Unit also outside form for reactivity
         st.write("**Functional Unit**")
         
-        # Options para Unit baseadas no product system
+        # Options for Unit based on product system
         unit_options_by_product = {
             "Biofuels": ["L", "MJ", "kg", "km"],
             "Food Products": ["kg", "meal", "kcal", "g"],
@@ -580,10 +580,10 @@ if st.session_state.get('show_edit_form') and selected_project:
                                                  object_options_by_product.get(edit_product, ["product", "service", "material", "energy"]),
                                                  key="edit_functional_unit_object")
     
-    # Processar submit do formulário
-    # Processar submit do formulário
+    # Process form submission
+    # Process form submission
     if submit_edit:
-        # Encontrar o índice do projeto atual na lista de projetos do usuário
+        # Find the index of current project in the user's project list
         user_projects = st.session_state.user_projects.get(username, [])
         project_index = None
         for idx, project in enumerate(user_projects):
@@ -592,10 +592,10 @@ if st.session_state.get('show_edit_form') and selected_project:
                 break
         
         if project_index is not None:
-            # Atualizar projeto
+            # Update project
             st.session_state.user_projects[username][project_index] = {
                 'name': edit_name,
-                'key_code': selected_project.get('key_code', '000000'),  # Manter código existente
+                'key_code': selected_project.get('key_code', '000000'),  # Keep existing code
                 'goal_statement': edit_goal,
                 'intended_application': edit_application,
                 'level_of_detail': edit_level,
@@ -619,10 +619,10 @@ if st.session_state.get('show_edit_form') and selected_project:
                 'updated_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
-            # Atualizar também o projeto atual na sessão
+            # Also update current project in session
             st.session_state.current_project = st.session_state.user_projects[username][project_index]
             
-            # Salvar dados
+            # Save data
             user_data = {
                 'projects': st.session_state.user_projects[username],
                 'preferences': {
@@ -633,11 +633,11 @@ if st.session_state.get('show_edit_form') and selected_project:
             }
             save_user_data(username, user_data)
             
-            st.success("✅ Projeto atualizado com sucesso!")
+            st.success("✅ Project updated successfully!")
             st.session_state.show_edit_form = False
             st.rerun()
         else:
-            st.error("❌ Erro ao encontrar o projeto para atualização.")
+            st.error("❌ Error finding project for update.")
     
     if cancel_edit:
         st.session_state.show_edit_form = False
