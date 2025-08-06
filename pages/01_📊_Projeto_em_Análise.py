@@ -132,18 +132,18 @@ if selected_project:
         # Exibir informações do projeto
         st.subheader(f"Informações do Projeto")
         
-        # Informações básicas do projeto LCA
-        col1, col2 = st.columns(2)
+        # Informações básicas do projeto LCA em 3 colunas
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             st.markdown(f"**🔑 Código do Projeto:** {selected_project.get('key_code', 'N/A')}")
             st.markdown(f"**🎯 Goal Statement:** {selected_project.get('goal_statement', selected_project.get('description', 'N/A'))}")
             st.markdown(f"**📋 Intended Application:** {selected_project.get('intended_application', 'N/A')}")
-            st.markdown(f"**� Type of LCA Study:** {selected_project.get('type_of_lca', selected_project.get('type', 'N/A'))}")
+            st.markdown(f"**📊 Type of LCA Study:** {selected_project.get('type_of_lca', selected_project.get('type', 'N/A'))}")
             st.markdown(f"**⚖️ Methodology:** {selected_project.get('methodology', 'N/A')}")
-            st.markdown(f"**📏 Scale:** {selected_project.get('scale', 'N/A')}")
         
         with col2:
+            st.markdown(f"**📏 Scale:** {selected_project.get('scale', 'N/A')}")
             st.markdown(f"**📊 Level of Detail:** {selected_project.get('level_of_detail', 'N/A')}")
             # Formatar Reference Flow com todas as informações
             ref_flow = selected_project.get('reference_flow', 'N/A')
@@ -157,7 +157,8 @@ if selected_project:
             st.markdown(f"**🔄 Reference Flow:** {reference_flow_display}")
             st.markdown(f"**🏭 System Boundaries:** {selected_project.get('system_boundaries', 'N/A')}")
             st.markdown(f"**🎛️ Product/System:** {selected_project.get('product_system', 'N/A')}")
-            
+        
+        with col3:
             # Exibir Functional Unit - compatibilidade com projetos antigos e novos
             functional_unit_unit = selected_project.get('functional_unit_unit')
             functional_unit_object = selected_project.get('functional_unit_object')
@@ -167,26 +168,219 @@ if selected_project:
                 # Compatibilidade com projetos antigos
                 functional_unit_display = selected_project.get('functional_unit', 'N/A')
             st.markdown(f"**📐 Functional Unit:** {functional_unit_display}")
-            
             st.markdown(f"**🌍 Region:** {selected_project.get('region', 'N/A')}")
+            
+            # Informações de Absolute Sustainability (se aplicável)
+            if selected_project.get('sharing_principle') and selected_project.get('reason_sharing_principle'):
+                st.markdown("**🌱 Absolute Sustainability Study:** Yes")
+                st.markdown(f"**📊 Sharing Principle:** {selected_project.get('sharing_principle', 'N/A')}")
+                st.markdown(f"**💡 Reason:** {selected_project.get('reason_sharing_principle', 'N/A')}")
+            else:
+                st.markdown("**🌱 Absolute Sustainability Study:** No")
+                st.markdown("")
+                st.markdown("")
         
-        # Informações de Absolute Sustainability (se aplicável)
-        if selected_project.get('sharing_principle') and selected_project.get('reason_sharing_principle'):
+        # Inicializar estado para LCI se não existir
+        if 'lci_started' not in st.session_state:
+            st.session_state.lci_started = {}
+        
+        # Verificar se o LCI foi iniciado para este projeto
+        project_key = selected_project.get('key_code', selected_project['name'])
+        lci_initiated = st.session_state.lci_started.get(project_key, False)
+        
+        # Verificar se já existe dados de LCI salvos no projeto
+        has_lci_data = selected_project.get('lci_data') is not None
+        
+        # Seção Continue to LCI / LCI Data
+        st.markdown("---")
+        
+        if not lci_initiated and not has_lci_data:
+            # Mostrar seção de desbloqueio para LCI com visual de progresso
+            st.markdown("### 📋 Life Cycle Inventory (LCI)")
+            
+            # Container sutil com estilo elegante para a fase de desbloqueio
+            st.markdown("""
+            <div style="
+                background: linear-gradient(135deg, #f8f9fd 0%, #f0f4f7 100%);
+                padding: 25px;
+                border-radius: 12px;
+                text-align: center;
+                color: #2c3e50;
+                margin: 15px 0;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                border: 1px solid #e3eaf0;
+                position: relative;
+                overflow: hidden;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: linear-gradient(90deg, #28a745, #20c997);
+                "></div>
+                <h3 style="margin: 10px 0 15px 0; font-size: 1.6em; color: #2c3e50;">🔓 Ready to Unlock Phase 2</h3>
+                <p style="font-size: 1.1em; margin: 0 0 15px 0; color: #5a6c7d;">
+                    ✨ Great progress! Phase 1 completed successfully.
+                </p>                        
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Botão principal de desbloqueio com estilo especial
+
+            if st.button("Continue to LCI", use_container_width=True, type="primary", key="unlock_lci_btn"):
+                st.session_state.lci_started[project_key] = True
+                # Mostrar animação de desbloqueio
+                st.balloons()
+                st.success("🎉 LCI Phase Unlocked! Welcome to Phase 2!")
+                import time
+                time.sleep(2)  # Pequena pausa para animação
+                st.rerun()
+        
+        else:
+            # Mostrar seção de LCI com sistema de níveis
+            st.markdown("### 📋 Life Cycle Inventory (LCI)")
+            
+            # Inicializar nível do usuário se não existir
+            if 'user_lci_level' not in st.session_state:
+                st.session_state.user_lci_level = {}
+            
+            if project_key not in st.session_state.user_lci_level:
+                st.session_state.user_lci_level[project_key] = 0  # Nível padrão
+            
+            current_level = st.session_state.user_lci_level[project_key]
+            
+            # Interface para seleção de nível
+            st.markdown("#### 🎯 LCI Assessment Level")
+            
+            level_descriptions = {
+                0: "**Level 0** - I don't know the process needed to reach the desired product",
+                1: "**Level 1** - I know the process but don't have the flow data for each part",
+                2: "**Level 2** - I know the process and have partial flow data",
+                3: "**Level 3** - I know the process and have all necessary flow data"
+            }
+            
+            # Mostrar descrições dos níveis em cards
+            for level, description in level_descriptions.items():
+                if level == current_level:
+                    st.success(f"✅ Current Level: {description}")
+                else:
+                    st.info(description)
+            
             st.markdown("---")
-            st.markdown("**🌱 Absolute Sustainability Study:** Yes")
-            st.markdown(f"**📊 Sharing Principle:** {selected_project.get('sharing_principle', 'N/A')}")
-            st.markdown(f"**💡 Reason:** {selected_project.get('reason_sharing_principle', 'N/A')}")
-        
+            
+            # Seletor de nível
+            col_level1, col_level2 = st.columns([2, 1])
+            
+            with col_level1:
+                st.markdown("**Select your current LCI knowledge level:**")
+                level_options = [
+                    "Level 0 - Don't know the process",
+                    "Level 1 - Know process, no data",
+                    "Level 2 - Know process, partial data", 
+                    "Level 3 - Know process, have all data"
+                ]
+                
+                selected_level_text = st.selectbox(
+                    "LCI Level",
+                    level_options,
+                    index=current_level,
+                    key=f"lci_level_selector_{project_key}"
+                )
+                
+                # Extrair o número do nível selecionado
+                selected_level = int(selected_level_text.split()[1])
+                
+                # Atualizar nível se mudou
+                if selected_level != current_level:
+                    st.session_state.user_lci_level[project_key] = selected_level
+                    st.rerun()
+            
+            with col_level2:
+                st.markdown("**Current Status:**")
+                if current_level == 0:
+                    st.error("🔍 Process Identification Needed")
+                elif current_level == 1:
+                    st.warning("📊 Data Collection Needed")
+                elif current_level == 2:
+                    st.warning("📈 Partial Data Available")
+                else:
+                    st.success("✅ Ready for LCI Input")
+            
+            st.markdown("---")
+            
+            # Botões baseados no nível atual
+            col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+            
+            with col_btn2:
+                if current_level == 0:
+                    if st.button("🔍 Identify your LCI Process", use_container_width=True, type="primary"):
+                        st.info("🚧 Process identification functionality will be available soon!")
+                        
+                elif current_level == 1:
+                    if st.button("� Go to LCI Data Generation", use_container_width=True, type="primary"):
+                        st.info("🚧 LCI data generation functionality will be available soon!")
+                        
+                elif current_level == 2:
+                    if st.button("📈 Go to Missing LCI Data Generation", use_container_width=True, type="primary"):
+                        st.info("🚧 Missing LCI data generation functionality will be available soon!")
+                        
+                elif current_level == 3:
+                    if st.button("➕ Add Your LCI Data", use_container_width=True, type="primary"):
+                        st.info("🚧 LCI data input functionality will be available soon!")
+            
+            # Informações adicionais baseadas no nível
+            st.markdown("---")
+            st.markdown("#### 💡 Next Steps")
+            
+            if current_level == 0:
+                st.markdown("""
+                **Process Identification Phase:**
+                - Map out the complete production process
+                - Identify all input and output flows
+                - Define system boundaries clearly
+                - Create process flow diagrams
+                """)
+                
+            elif current_level == 1:
+                st.markdown("""
+                **Data Collection Phase:**
+                - Gather quantitative data for all process inputs
+                - Collect emission factors and conversion rates
+                - Document energy consumption patterns
+                - Compile waste and by-product information
+                """)
+                
+            elif current_level == 2:
+                st.markdown("""
+                **Data Completion Phase:**
+                - Identify missing data gaps
+                - Prioritize critical missing information
+                - Use estimation methods or literature values
+                - Validate partial data consistency
+                """)
+                
+            else:
+                st.markdown("""
+                **Data Input Phase:**
+                - Input all collected LCI data
+                - Organize data by process stages
+                - Verify data quality and completeness
+                - Prepare for impact assessment
+                """)
+
+        st.markdown("---")
+
         # Mostrar figura do System Boundaries se disponível
         if selected_project.get('system_boundaries_figure'):
-            with st.expander("🖼️ System Boundaries Figure"):
+            with st.expander("**System Boundaries Figure**"):
                 try:
                     st.image(selected_project['system_boundaries_figure'], caption="System Boundaries Diagram")
                 except:
                     st.info("Figura salva mas não pode ser exibida no momento.")
-        
-        st.markdown("---")
-        
+
         # Seção para notas e observações
         st.write("### 📝 Project Notes & Observations")
         
