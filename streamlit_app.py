@@ -34,6 +34,25 @@ page_bg__img = """
 [data-testid="stToolbar"] {
     z-index: 1;
 }
+
+/* Estilo para expander com fundo branco */
+.stExpander {
+    background-color: white !important;
+    border-radius: 8px !important;
+    border: 1px solid #e6e6e6 !important;
+}
+
+.stExpander > div > div {
+    background-color: white !important;
+}
+
+.stExpander [data-testid="stExpanderHeader"] {
+    background-color: white !important;
+}
+
+.stExpander [data-testid="stExpanderContent"] {
+    background-color: white !important;
+}
 </style>
 """
 st.markdown(page_bg__img, unsafe_allow_html=True)
@@ -510,7 +529,7 @@ if st.session_state.show_project_form:
                                 ["Brazil", "Portugal", "Denmark", "UK", "Germany", "USA", "New Zealand"])
             
             # Absolute Sustainability Study expander
-            with st.expander("Absolute Sustainability Study?"):
+            with st.expander("**Absolute Sustainability Study?**"):
                 sharing_principle = st.selectbox("Sharing Principle", 
                                                ["Equal per Capita", "Grandfathering", "Economic Share", "Needs-Based"])
                 reason_sharing_principle = st.text_input("Reason for Sharing Principle", 
