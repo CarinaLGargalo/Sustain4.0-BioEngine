@@ -348,16 +348,20 @@ def login_page():
         # Styled platform description
         st.markdown("""
         <div class="platform-description">
-            <h4>🌍 About the Platform</h4>
-            <p><strong>Sustain4.0 BioEngine</strong> is an integrated environmental sustainability analysis platform. 
-            We offer an intuitive interface for researchers and environmental analysts, enabling:</p>
+            <h4>🌿 About Sustain4.0 BioEngine</h4>
+            <p>Discover our next-generation, open-source software designed to make LCA for bioprocesses more powerful, accurate, and accessible. We are building this platform from the ground up in order to handle the unique complexities of bio-based systems and provide meaningful environmental sustainability insights. Key features include: </p>
             <ul>
-                <li>🌿 <strong>Biodiversity analysis</strong> - Wildlife monitoring</li>
-                <li>🌱 <strong>Carbon monitoring</strong> - Emissions tracking</li>
-                <li>💧 <strong>Water quality</strong> - Water resource analysis</li>
-                <li>🌱 <strong>Soil health</strong> - Fertility assessment</li>
+                <li>🛠️ <strong>Open-Source & Specialized</strong> - A fully open-source platform specifically designed for conducting Life Cycle Assessments (LCA) of bioprocesses. </li>
+                <li> 📈 <strong>Advanced & Dynamic Analysis</strong> - Our software is built for the future of process monitoring. It's designed to connect with online data ingestion pipelines and allows for soft sensor integration. This enables dynamic, near real-time LCA, moving your analysis beyond static, one-size-fits-all results. </li>
+                <li>⚗️ <strong>Tackling Bioprocess Complexity</strong>
+                  <ul>
+                    <li>Bridging data gaps with built-in estimation tools.</li>
+                    <li>Quantifying and handling uncertainty through sensitivity and Monte Carlo analyses.</li>
+                  </ul>
+                </li>
+                <li>🌎 <strong>Sustainability within Planetary Boundaries</strong> - A key feature is the integration of Absolute Environmental Sustainability Assessment (AESA). This allows you to evaluate your bioprocess's performance not just relatively, but against the absolute carrying capacity of the Earth as defined by the Planetary Boundaries framework. </li>
+                <li>📑 <strong>Interpretable plotting and Comprehensive Reporting</strong> - Easily export your findings into a detailed report (or plots), summarizing your methodology, data, and results for clear communication and documentation.</li>
             </ul>
-            <p>Transform environmental data into actionable insights for a more sustainable future! 🚀</p>
         </div>
         """, unsafe_allow_html=True)
 
