@@ -59,7 +59,13 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Import functions from utilities module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import check_authentication
+from utils import check_authentication, generate_project_pdf
+
+# Initialize session states
+if 'show_edit_form' not in st.session_state:
+    st.session_state.show_edit_form = False
+if 'show_export' not in st.session_state:
+    st.session_state.show_export = False
 
 # Authentication verification
 if not st.session_state.get('authenticated', False):
@@ -95,7 +101,7 @@ else:
         st.session_state.current_project = selected_project
 
 # Page header with project name
-col1, col2, col3, col4 = st.columns([4, 1, 1, 1])
+col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
 
 with col1:
     if selected_project_name:
@@ -108,17 +114,62 @@ with col2:
     st.write("")
 
 with col3:
-    # Button to edit project (only if there is a selected project)
+    # Button to export project (only if there is a selected project)
     if st.session_state.get('current_project'):
-        if st.button("✏️ Edit Project", use_container_width=True):
-            st.session_state.show_edit_form = True
+        if st.button("📄 Export", use_container_width=True):
+            st.session_state.show_export = True
 
 with col4:
+    # Button to edit project (only if there is a selected project)
+    if st.session_state.get('current_project'):
+        if st.button("✏️ Edit", use_container_width=True):
+            st.session_state.show_edit_form = True
+
+with col5:
     # Button to return to main page
-    if st.button("🏠 Back to Home", use_container_width=True):
+    if st.button("🏠 Home", use_container_width=True):
         st.switch_page("streamlit_app.py")
 
 st.markdown('---')
+
+# Handle Export functionality
+if st.session_state.get('show_export') and st.session_state.get('current_project'):
+    selected_project = st.session_state.current_project
+    selected_project_name = selected_project['name']
+    
+    # Generate PDF
+    try:
+        pdf_buffer = generate_project_pdf(selected_project, selected_project_name)
+        
+        # Create download button
+        st.success("✅ PDF report generated successfully!")
+        
+        # Filename with timestamp
+        timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"Project_Report_{selected_project_name.replace(' ', '_')}_{timestamp}.pdf"
+        
+        # Download button
+        st.download_button(
+            label="⬇️ Download PDF Report",
+            data=pdf_buffer.getvalue(),
+            file_name=filename,
+            mime="application/pdf",
+            use_container_width=True
+        )
+        
+        # Reset export state after showing download
+        if st.button("✅ Done", use_container_width=True):
+            st.session_state.show_export = False
+            st.rerun()
+            
+    except Exception as e:
+        st.error(f"❌ Error generating PDF: {str(e)}")
+        if st.button("🔄 Try Again", use_container_width=True):
+            st.session_state.show_export = False
+            st.rerun()
+    
+    # Add some spacing
+    st.markdown("---")
 
 # Show project information if selected
 if st.session_state.get('current_project'):
@@ -399,10 +450,6 @@ if selected_project:
         if notes != st.session_state.notes[selected_project_name]:
             st.session_state.notes[selected_project_name] = notes
             st.success("Observations saved!")
-
-# Initialize state for editing if it doesn't exist
-if 'show_edit_form' not in st.session_state:
-    st.session_state.show_edit_form = False
 
 # Edit form (if editing)
 if st.session_state.get('show_edit_form') and selected_project:

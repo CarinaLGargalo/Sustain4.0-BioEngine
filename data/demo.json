@@ -1,42 +1,27 @@
 {
   "projects": [
     {
-      "name": "Projeto de Demonstração",
-      "description": "Este é um projeto de exemplo para demonstrar a funcionalidade de persistência de dados.",
-      "type": "Análise de Biodiversidade",
-      "date": "2025-08-01",
-      "created_at": "2025-08-01 10:00:00"
-    },
-    {
-      "name": "Monitoramento Rio Amazonas",
-      "description": "Monitoramento da qualidade da água no Rio Amazonas.",
-      "type": "Qualidade da Água",
-      "date": "2025-07-15",
-      "created_at": "2025-07-15 14:30:00"
-    },
-    {
-      "name": "ikjn",
-      "key_code": "478591",
-      "goal_statement": "",
-      "intended_application": "",
+      "name": "cede",
+      "key_code": "929484",
+      "goal_statement": "ddsadasd",
+      "intended_application": "dsadasd",
       "level_of_detail": "Screening",
       "type_of_lca": "Prospective",
       "methodology": "Attributional",
       "scale": "lab",
-      "reference_flow": 2.0,
+      "reference_flow": 1,
       "reference_flow_unit": "kg",
       "reference_flow_time_unit": "hour",
       "system_boundaries": "gate-to-gate",
       "system_boundaries_figure": null,
-      "product_system": "Building Materials",
-      "functional_unit_unit": "m³",
-      "functional_unit_object": "volume",
-      "functional_unit": "m³ of volume",
+      "product_system": "Biofuels",
+      "functional_unit_unit": "L",
+      "functional_unit_object": "biofuel",
+      "functional_unit": "L of biofuel",
       "region": "Brazil",
       "sharing_principle": "Equal per Capita",
-      "reason_sharing_principle": "kook",
-      "created_at": "2025-08-06 18:22:08",
-      "updated_at": "2025-08-06 18:22:32"
+      "reason_sharing_principle": "deacwadsc",
+      "created_at": "2025-09-12 23:14:27"
     }
   ],
   "preferences": {
@@ -44,5 +29,5 @@
     "notifications": true
   },
   "selected_project_index": 0,
-  "last_update": "2025-08-07 01:06:03"
+  "last_update": "2025-09-12 23:19:40"
 }

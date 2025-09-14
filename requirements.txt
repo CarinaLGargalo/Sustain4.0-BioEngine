@@ -9,3 +9,4 @@ bcrypt
 pyyaml
 matplotlib
 seaborn
+reportlab
