@@ -430,15 +430,36 @@ if selected_project:
                 st.markdown("---")
                 
                 # Action buttons
-                col_action1, col_action2, col_action3 = st.columns([1, 1, 1])
+                col_action1, col_action2, col_action3, col_action4 = st.columns([1, 1, 1, 1])
                 
                 with col_action1:
+                    # Download original Excel file
+                    if selected_project.get('lci_excel_file'):
+                        import base64
+                        excel_data = base64.b64decode(selected_project['lci_excel_file'])
+                        original_filename = selected_project.get('lci_excel_filename', 'lci_data.xlsx')
+                        
+                        st.download_button(
+                            label="📥 Download Excel",
+                            data=excel_data,
+                            file_name=original_filename,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            help="Download the original Excel file you uploaded"
+                        )
+                    else:
+                        st.button("📥 Download Excel", use_container_width=True, disabled=True,
+                                 help="Original file not available")
+                
+                with col_action2:
                     if st.button("🔄 Redo LCI Data", use_container_width=True, type="secondary"):
                         # Clear LCI data and restart
                         selected_project['lci_complete'] = False
                         selected_project['lci_data'] = None
                         selected_project['lci_database_name'] = None
                         selected_project['lci_upload_date'] = None
+                        selected_project['lci_excel_file'] = None  # Clear Excel file
+                        selected_project['lci_excel_filename'] = None
                         
                         # Update in user_projects
                         for idx, proj in enumerate(st.session_state.user_projects[username]):
@@ -462,13 +483,13 @@ if selected_project:
                         time.sleep(1)
                         st.rerun()
                 
-                with col_action2:
+                with col_action3:
                     if st.button("📊 Run Impact Assessment", use_container_width=True, type="primary", disabled=True):
                         st.info("🚧 Impact assessment functionality will be available soon!")
                 
-                with col_action3:
-                    if st.button("📥 Export LCI Data", use_container_width=True, disabled=True):
-                        st.info("🚧 Export functionality will be available soon!")
+                with col_action4:
+                    if st.button("� Export Report", use_container_width=True, disabled=True):
+                        st.info("🚧 Report export functionality will be available soon!")
             
             # Check if Level 3 interface should be shown
             elif st.session_state.get('show_level_3_interface'):
@@ -671,6 +692,10 @@ if selected_project:
                                         # Note: Brightway integration requires setup
                                         # For now, we'll save the data structure
                                         
+                                        # Save the original Excel file in base64 for later download
+                                        import base64
+                                        excel_file_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+                                        
                                         # Save parsed data to project
                                         selected_project['lci_database_name'] = db_name
                                         selected_project['lci_data'] = {
@@ -679,6 +704,8 @@ if selected_project:
                                             'exchanges': importer.exchanges,
                                             'flow_mapping': importer.flow_mapping
                                         }
+                                        selected_project['lci_excel_file'] = excel_file_b64  # Save Excel file
+                                        selected_project['lci_excel_filename'] = uploaded_file.name  # Save original filename
                                         selected_project['lci_data_source'] = 'user_upload'
                                         selected_project['lci_complete'] = True
                                         selected_project['lci_upload_date'] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
