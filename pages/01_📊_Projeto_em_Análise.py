@@ -311,10 +311,169 @@ if selected_project:
             
             current_level = st.session_state.user_lci_level[project_key]
             
+            # Check if LCI data already exists (user completed Level 3)
+            if selected_project.get('lci_complete'):
+                st.success("✅ **LCI Data Available** - Your inventory is ready for impact assessment!")
+                
+                lci_data = selected_project.get('lci_data', {})
+                db_name = selected_project.get('lci_database_name', 'N/A')
+                upload_date = selected_project.get('lci_upload_date', 'N/A')
+                
+                # Summary metrics
+                col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                
+                with col_m1:
+                    activities_count = len(lci_data.get('activities', []))
+                    st.metric("📦 Activities", activities_count)
+                
+                with col_m2:
+                    exchanges_count = len(lci_data.get('exchanges', []))
+                    st.metric("🔄 Exchanges", exchanges_count)
+                
+                with col_m3:
+                    biosphere_count = sum(1 for e in lci_data.get('exchanges', []) 
+                                         if e.get('type') in ['emission', 'resource'])
+                    st.metric("🌍 Biosphere Flows", biosphere_count)
+                
+                with col_m4:
+                    st.metric("💾 Database", db_name[:15] + "..." if len(db_name) > 15 else db_name)
+                
+                st.markdown("---")
+                
+                # Detailed information in expander
+                with st.expander("📊 **View Detailed LCI Data**", expanded=False):
+                    
+                    tab_summary, tab_activities, tab_exchanges = st.tabs([
+                        "📋 Summary", "🏭 Activities", "🔄 Exchanges"
+                    ])
+                    
+                    with tab_summary:
+                        st.markdown("#### Database Information")
+                        col_info1, col_info2 = st.columns(2)
+                        
+                        with col_info1:
+                            st.markdown(f"**Database Name:** {db_name}")
+                            st.markdown(f"**Upload Date:** {upload_date}")
+                            st.markdown(f"**Data Source:** {selected_project.get('lci_data_source', 'N/A')}")
+                        
+                        with col_info2:
+                            metadata = lci_data.get('metadata', {})
+                            st.markdown(f"**Functional Unit:** {metadata.get('functional_unit', 'N/A')}")
+                            st.markdown(f"**Location:** {metadata.get('location', 'N/A')}")
+                            st.markdown(f"**Time Period:** {metadata.get('time_period', 'N/A')}")
+                        
+                        st.markdown("---")
+                        st.markdown("#### Process Activities Overview")
+                        
+                        activities = lci_data.get('activities', [])
+                        if activities:
+                            activities_df = pd.DataFrame(activities)
+                            # Show key columns
+                            display_cols = ['code', 'name', 'location', 'unit']
+                            available_cols = [col for col in display_cols if col in activities_df.columns]
+                            st.dataframe(
+                                activities_df[available_cols],
+                                use_container_width=True,
+                                hide_index=True
+                            )
+                    
+                    with tab_activities:
+                        st.markdown("#### All Process Activities")
+                        activities = lci_data.get('activities', [])
+                        if activities:
+                            activities_df = pd.DataFrame(activities)
+                            st.dataframe(
+                                activities_df,
+                                use_container_width=True,
+                                hide_index=True
+                            )
+                        else:
+                            st.info("No activities data available")
+                    
+                    with tab_exchanges:
+                        st.markdown("#### All Exchanges (Inputs & Outputs)")
+                        exchanges = lci_data.get('exchanges', [])
+                        if exchanges:
+                            exchanges_df = pd.DataFrame(exchanges)
+                            
+                            # Filter options
+                            col_filter1, col_filter2 = st.columns(2)
+                            
+                            with col_filter1:
+                                exchange_types = ['All'] + list(exchanges_df['type'].unique()) if 'type' in exchanges_df.columns else ['All']
+                                selected_type = st.selectbox("Filter by Type", exchange_types)
+                            
+                            with col_filter2:
+                                if 'activity_code' in exchanges_df.columns:
+                                    activity_codes = ['All'] + list(exchanges_df['activity_code'].unique())
+                                    selected_activity = st.selectbox("Filter by Activity", activity_codes)
+                                else:
+                                    selected_activity = 'All'
+                            
+                            # Apply filters
+                            filtered_df = exchanges_df.copy()
+                            if selected_type != 'All' and 'type' in filtered_df.columns:
+                                filtered_df = filtered_df[filtered_df['type'] == selected_type]
+                            if selected_activity != 'All' and 'activity_code' in filtered_df.columns:
+                                filtered_df = filtered_df[filtered_df['activity_code'] == selected_activity]
+                            
+                            st.dataframe(
+                                filtered_df,
+                                use_container_width=True,
+                                hide_index=True
+                            )
+                            
+                            st.caption(f"Showing {len(filtered_df)} of {len(exchanges_df)} exchanges")
+                        else:
+                            st.info("No exchanges data available")
+                
+                st.markdown("---")
+                
+                # Action buttons
+                col_action1, col_action2, col_action3 = st.columns([1, 1, 1])
+                
+                with col_action1:
+                    if st.button("🔄 Redo LCI Data", use_container_width=True, type="secondary"):
+                        # Clear LCI data and restart
+                        selected_project['lci_complete'] = False
+                        selected_project['lci_data'] = None
+                        selected_project['lci_database_name'] = None
+                        selected_project['lci_upload_date'] = None
+                        
+                        # Update in user_projects
+                        for idx, proj in enumerate(st.session_state.user_projects[username]):
+                            if proj.get('key_code') == selected_project.get('key_code'):
+                                st.session_state.user_projects[username][idx] = selected_project
+                                break
+                        
+                        # Save to file
+                        user_data = {
+                            'projects': st.session_state.user_projects[username],
+                            'preferences': {
+                                'theme': st.session_state.get('theme', 'light'),
+                                'notifications': st.session_state.get('notifications', True)
+                            },
+                            'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        save_user_data(username, user_data)
+                        
+                        st.success("🔄 LCI data cleared! You can now upload new data.")
+                        import time
+                        time.sleep(1)
+                        st.rerun()
+                
+                with col_action2:
+                    if st.button("📊 Run Impact Assessment", use_container_width=True, type="primary", disabled=True):
+                        st.info("🚧 Impact assessment functionality will be available soon!")
+                
+                with col_action3:
+                    if st.button("📥 Export LCI Data", use_container_width=True, disabled=True):
+                        st.info("🚧 Export functionality will be available soon!")
+            
             # Check if Level 3 interface should be shown
-            if st.session_state.get('show_level_3_interface'):
+            elif st.session_state.get('show_level_3_interface'):
                 # Show Level 3 interface (replaces level selection)
-                st.markdown("## ➕ Add Your Complete LCI Data")
+                st.markdown("#### ➕ Add Your Complete LCI Data")
                 
                 # Back button
                 if st.button("⬅️ Back to Level Selection"):
@@ -458,9 +617,19 @@ if selected_project:
                                         importer.activities,
                                         importer.exchanges
                                     )
-                                    st.plotly_chart(fig, use_container_width=True)
+                                    if fig:
+                                        st.plotly_chart(fig, use_container_width=True)
+                                    else:
+                                        st.info("""
+                                        📦 **Network diagram requires networkx package**
+                                        
+                                        Install with: `pip install networkx`
+                                        
+                                        The diagram will show process connections and flows between activities.
+                                        """)
                                 except Exception as e:
-                                    st.warning(f"Could not generate network diagram: {str(e)}")
+                                    st.warning(f"⚠️ Could not generate network diagram.\n\nDetails: {str(e)}")
+                                    st.info("Install networkx package to enable this feature: `pip install networkx`")
                             else:
                                 st.info("No activities to display")
                         

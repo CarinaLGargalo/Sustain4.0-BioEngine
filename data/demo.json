@@ -178,11 +178,168 @@
       "lci_data_source": "user_upload",
       "lci_complete": true,
       "lci_upload_date": "2025-10-31 18:05:17"
+    },
+    {
+      "name": "Teste",
+      "key_code": "850964",
+      "goal_statement": "a",
+      "intended_application": "a",
+      "level_of_detail": "Screening",
+      "type_of_lca": "Prospective",
+      "methodology": "Attributional",
+      "scale": "lab",
+      "reference_flow": 424,
+      "reference_flow_unit": "kg",
+      "reference_flow_time_unit": "hour",
+      "system_boundaries": "gate-to-gate",
+      "system_boundaries_figure": null,
+      "product_system": "Biofuels",
+      "functional_unit_unit": "L",
+      "functional_unit_object": "biofuel",
+      "functional_unit": "L of biofuel",
+      "region": "Brazil",
+      "sharing_principle": "Equal per Capita",
+      "reason_sharing_principle": "",
+      "created_at": "2025-10-31 18:30:12",
+      "lci_database_name": "lci_850964",
+      "lci_data": {
+        "metadata": {
+          "Project Name": "Bioethanol from Sugarcane - Example",
+          "Functional Unit": "1 L",
+          "Location": "BR",
+          "Scale": "pilot",
+          "System Boundaries": "gate-to-gate"
+        },
+        "activities": [
+          {
+            "code": "FERM_01",
+            "name": "Fermentation",
+            "unit": "kg",
+            "location": "BR",
+            "reference_production": 1.0
+          },
+          {
+            "code": "DIST_01",
+            "name": "Distillation",
+            "unit": "L",
+            "location": "BR",
+            "reference_production": 1.0
+          }
+        ],
+        "exchanges": [
+          {
+            "activity_code": "FERM_01",
+            "type": "production",
+            "flow_name": "Fermented mass",
+            "amount": 1.0,
+            "unit": "kg",
+            "category": null
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Sugarcane juice",
+            "amount": 1.8,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.1
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Yeast",
+            "amount": 0.05,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.005
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Water",
+            "amount": 5.0,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.25
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Electricity",
+            "amount": 2.5,
+            "unit": "kWh",
+            "category": "energy",
+            "uncertainty": 0.15
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "emission",
+            "flow_name": "CO2, biogenic",
+            "amount": 0.9,
+            "unit": "kg",
+            "category": "air",
+            "uncertainty": 0.05
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "emission",
+            "flow_name": "Wastewater",
+            "amount": 4.5,
+            "unit": "kg",
+            "category": "water",
+            "uncertainty": 0.3
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "production",
+            "flow_name": "Crude ethanol",
+            "amount": 1.0,
+            "unit": "L",
+            "category": null
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "input",
+            "flow_name": "Fermented mass",
+            "amount": 1.2,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.08
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "input",
+            "flow_name": "Heat (steam)",
+            "amount": 15.0,
+            "unit": "MJ",
+            "category": "energy",
+            "uncertainty": 1.0
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "emission",
+            "flow_name": "Ethanol vapor",
+            "amount": 0.02,
+            "unit": "kg",
+            "category": "air",
+            "uncertainty": 0.003
+          }
+        ],
+        "flow_mapping": {
+          "CO2, biogenic": "Carbon dioxide, non-fossil",
+          "Wastewater": "Water, unspecified natural origin",
+          "Ethanol vapor": "Ethanol"
+        }
+      },
+      "lci_data_source": "user_upload",
+      "lci_complete": true,
+      "lci_upload_date": "2025-10-31 18:31:00"
     }
   ],
   "preferences": {
     "theme": "Claro",
     "notifications": true
   },
-  "last_update": "2025-10-31 18:05:17"
+  "selected_project_index": 2,
+  "last_update": "2025-10-31 18:32:08"
 }
