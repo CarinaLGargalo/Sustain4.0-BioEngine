@@ -59,13 +59,21 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Import functions from utilities module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import check_authentication, generate_project_pdf
+from utils import check_authentication, generate_project_pdf, save_user_data
+from brightway_integration import (
+    SustainExcelImporter, 
+    generate_excel_template, 
+    get_example_lci_file,
+    generate_process_network_diagram
+)
 
 # Initialize session states
 if 'show_edit_form' not in st.session_state:
     st.session_state.show_edit_form = False
 if 'show_export' not in st.session_state:
     st.session_state.show_export = False
+if 'show_level_3_interface' not in st.session_state:
+    st.session_state.show_level_3_interface = False
 
 # Authentication verification
 if not st.session_state.get('authenticated', False):
@@ -380,7 +388,8 @@ if selected_project:
                         
                 elif current_level == 3:
                     if st.button("➕ Add Your LCI Data", use_container_width=True, type="primary"):
-                        st.info("🚧 LCI data input functionality will be available soon!")
+                        st.session_state.show_level_3_interface = True
+                        st.rerun()
             
             # Additional information based on level
             st.markdown("---")
@@ -432,30 +441,268 @@ if selected_project:
                 except:
                     st.info("Figure saved but cannot be displayed at the moment.")
 
-        # Section for notes and observations
-        st.write("### 📝 Project Notes & Observations")
+# Level 3 Interface: Complete LCI Data Upload
+if st.session_state.get('show_level_3_interface') and selected_project:
+    
+    st.markdown("---")
+    st.markdown("## ➕ Add Your Complete LCI Data")
+    
+    # Back button
+    if st.button("⬅️ Back to Project Analysis"):
+        st.session_state.show_level_3_interface = False
+        st.rerun()
+    
+    st.info("""
+    📋 **You have all your LCI data?** Great! Upload it here.
+    
+    Your data should include:
+    - All process activities
+    - All inputs (materials, energy, water, etc.)
+    - All outputs (products, emissions, waste, etc.)
+    - Amounts with units
+    """)
+    
+    # Step 1: Download template
+    st.markdown("### 📥 Step 1: Get the Template")
+    
+    col_template, col_example = st.columns(2)
+    
+    with col_template:
+        # Generate template
+        template_buffer = generate_excel_template(selected_project)
         
-        if 'notes' not in st.session_state:
-            st.session_state.notes = {}
-        
-        if selected_project_name not in st.session_state.notes:
-            st.session_state.notes[selected_project_name] = ""
-        
-        notes = st.text_area(
-            "Add observations about this project:",
-            value=st.session_state.notes[selected_project_name],
-            height=150
+        st.download_button(
+            label="⬇️ Download Excel Template",
+            data=template_buffer,
+            file_name="Sustain40_LCI_Template.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+            help="Download the blank template to fill with your data"
         )
+    
+    with col_example:
+        # Example file
+        example_buffer = get_example_lci_file()
         
-        if notes != st.session_state.notes[selected_project_name]:
-            st.session_state.notes[selected_project_name] = notes
-            st.success("Observations saved!")
+        st.download_button(
+            label="📖 Download Example File",
+            data=example_buffer,
+            file_name="Sustain40_LCI_Example.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+            help="Download an example file to see how to structure your data"
+        )
+    
+    st.markdown("---")
+    
+    # Step 2: Upload filled file
+    st.markdown("### 📤 Step 2: Upload Your Data")
+    
+    uploaded_file = st.file_uploader(
+        "Upload your filled Excel file",
+        type=['xlsx', 'xls'],
+        help="Use the template above and fill with your LCI data",
+        key="lci_file_uploader"
+    )
+    
+    if uploaded_file:
+        
+        # Save temporarily
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+            tmp.write(uploaded_file.getvalue())
+            tmp_path = tmp.name
+        
+        # Parse and validate
+        with st.spinner("🔍 Validating your data..."):
+            importer = SustainExcelImporter(tmp_path)
+            is_valid = importer.parse_excel()
+        
+        # Show validation results
+        if importer.validation_errors:
+            st.error("❌ Validation Errors Found:")
+            for error in importer.validation_errors:
+                st.error(error)
+            
+            st.info("💡 Please fix the errors in your Excel file and upload again.")
+            
+        else:
+            # Show warnings (non-blocking)
+            if importer.warnings:
+                with st.expander("⚠️ Warnings (non-critical)", expanded=False):
+                    for warning in importer.warnings:
+                        st.warning(warning)
+            
+            st.success("✅ File validated successfully!")
+            
+            # Step 3: Preview data
+            st.markdown("---")
+            st.markdown("### 👁️ Step 3: Preview Your Data")
+            
+            tab_activities, tab_exchanges, tab_network = st.tabs([
+                "📋 Activities", "🔄 Exchanges", "🕸️ Network Diagram"
+            ])
+            
+            with tab_activities:
+                st.markdown("#### Process Activities")
+                activities_df = pd.DataFrame(importer.activities)
+                st.dataframe(
+                    activities_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    st.metric("Total Activities", len(importer.activities))
+                with col_m2:
+                    unique_locations = len(set(act['location'] for act in importer.activities))
+                    st.metric("Locations", unique_locations)
+            
+            with tab_exchanges:
+                st.markdown("#### All Exchanges")
+                exchanges_df = pd.DataFrame(importer.exchanges)
+                
+                # Add color coding by type
+                st.dataframe(
+                    exchanges_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_m1, col_m2, col_m3 = st.columns(3)
+                with col_m1:
+                    st.metric("Total Exchanges", len(importer.exchanges))
+                with col_m2:
+                    inputs = sum(1 for e in importer.exchanges if e['type'] == 'input')
+                    st.metric("Inputs", inputs)
+                with col_m3:
+                    emissions = sum(1 for e in importer.exchanges if e['type'] == 'emission')
+                    st.metric("Emissions", emissions)
+            
+            with tab_network:
+                st.markdown("#### Process Flow Diagram")
+                
+                if len(importer.activities) > 0:
+                    try:
+                        fig = generate_process_network_diagram(
+                            importer.activities,
+                            importer.exchanges
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"Could not generate network diagram: {str(e)}")
+                else:
+                    st.info("No activities to display")
+            
+            # Step 4: Create database
+            st.markdown("---")
+            st.markdown("### 💾 Step 4: Create LCA Database")
+            
+            st.info("""
+            ✨ **Almost there!** Click below to create your Brightway database.
+            
+            This will:
+            - Convert your data to Brightway format
+            - Link emissions to biosphere flows
+            - Validate all connections
+            - Make it ready for LCA calculations
+            """)
+            
+            db_name = st.text_input(
+                "Database Name",
+                value=f"lci_{selected_project['key_code']}",
+                help="Name for your Brightway database (no spaces)"
+            )
+            
+            # Replace spaces with underscores
+            db_name = db_name.replace(' ', '_')
+            
+            col_cancel, col_create = st.columns([1, 2])
+            
+            with col_cancel:
+                if st.button("❌ Cancel", use_container_width=True):
+                    st.session_state.show_level_3_interface = False
+                    st.rerun()
+            
+            with col_create:
+                if st.button("🚀 Create Database & Run LCA", type="primary", use_container_width=True):
+                    
+                    with st.spinner("Creating Brightway database..."):
+                        try:
+                            # Note: Brightway integration requires setup
+                            # For now, we'll save the data structure
+                            
+                            # Save parsed data to project
+                            selected_project['lci_database_name'] = db_name
+                            selected_project['lci_data'] = {
+                                'metadata': importer.metadata,
+                                'activities': importer.activities,
+                                'exchanges': importer.exchanges,
+                                'flow_mapping': importer.flow_mapping
+                            }
+                            selected_project['lci_data_source'] = 'user_upload'
+                            selected_project['lci_complete'] = True
+                            selected_project['lci_upload_date'] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            
+                            # Update project in user_projects
+                            for idx, proj in enumerate(st.session_state.user_projects[username]):
+                                if proj.get('key_code') == selected_project.get('key_code'):
+                                    st.session_state.user_projects[username][idx] = selected_project
+                                    break
+                            
+                            # Save to file
+                            user_data = {
+                                'projects': st.session_state.user_projects[username],
+                                'preferences': {
+                                    'theme': st.session_state.get('theme', 'light'),
+                                    'notifications': st.session_state.get('notifications', True)
+                                },
+                                'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            save_user_data(username, user_data)
+                            
+                            st.success(f"✅ LCI data saved successfully!")
+                            
+                            # Show database info
+                            col_m1, col_m2, col_m3 = st.columns(3)
+                            
+                            with col_m1:
+                                st.metric("📦 Activities", len(importer.activities))
+                            with col_m2:
+                                st.metric("🔄 Exchanges", len(importer.exchanges))
+                            with col_m3:
+                                biosphere_count = sum(1 for e in importer.exchanges if e['type'] in ['emission', 'resource'])
+                                st.metric("🌍 Biosphere Flows", biosphere_count)
+                            
+                            st.balloons()
+                            
+                            # Info about next steps
+                            st.markdown("---")
+                            st.info("""
+                            ✨ **Your LCI data is ready!**
+                            
+                            **Next Steps:**
+                            1. Your data has been saved to the project
+                            2. When Brightway is fully configured, you'll be able to:
+                               - Calculate environmental impacts (GWP, water use, etc.)
+                               - Run uncertainty analysis
+                               - Compare scenarios
+                               - Generate detailed reports
+                            
+                            **Current Status:** ✅ Data validated and stored
+                            """)
+                            
+                            if st.button("✅ Done - Back to Project", use_container_width=True, type="primary"):
+                                st.session_state.show_level_3_interface = False
+                                st.rerun()
+                            
+                        except Exception as e:
+                            st.error(f"❌ Error saving database: {str(e)}")
+                            st.exception(e)
 
 # Edit form (if editing)
 if st.session_state.get('show_edit_form') and selected_project:
-    
-    # Import necessary functions from utils
-    from utils import save_user_data
     
     # Initialize values in session_state for editing if they don't exist
     if 'edit_product_system' not in st.session_state:

@@ -10,3 +10,13 @@ pyyaml
 matplotlib
 seaborn
 reportlab
+openpyxl
+
+# Optional dependencies for Level 3 (LCI data upload)
+# Uncomment the line below if you want network diagrams:
+# networkx
+
+# Optional dependencies for full Brightway integration
+# Uncomment the lines below when ready to use Brightway:
+# brightway25
+# pypardiso

@@ -1,18 +1,41 @@
 {
   "projects": [
     {
-      "name": "cede",
-      "key_code": "929484",
-      "goal_statement": "ddsadasd",
-      "intended_application": "dsadasd",
+      "name": "Super Projeto",
+      "key_code": "635209",
+      "goal_statement": "Legal",
+      "intended_application": "Ser bom",
       "level_of_detail": "Screening",
       "type_of_lca": "Prospective",
       "methodology": "Attributional",
       "scale": "lab",
-      "reference_flow": 1,
-      "reference_flow_unit": "kg",
+      "reference_flow": 1000,
+      "reference_flow_unit": "L",
       "reference_flow_time_unit": "hour",
-      "system_boundaries": "gate-to-gate",
+      "system_boundaries": "cradle-to-cradle",
+      "system_boundaries_figure": null,
+      "product_system": "Biofuels",
+      "functional_unit_unit": "L",
+      "functional_unit_object": "biofuel",
+      "functional_unit": "L of biofuel",
+      "region": "Brazil",
+      "sharing_principle": "Needs-Based",
+      "reason_sharing_principle": "Não sei.",
+      "created_at": "2025-10-31 16:09:56"
+    },
+    {
+      "name": "Amandão",
+      "key_code": "028354",
+      "goal_statement": "Peidar",
+      "intended_application": "Comer macarrão",
+      "level_of_detail": "Screening",
+      "type_of_lca": "Prospective",
+      "methodology": "Attributional",
+      "scale": "lab",
+      "reference_flow": 1000,
+      "reference_flow_unit": "L",
+      "reference_flow_time_unit": "month",
+      "system_boundaries": "cradle-to-cradle",
       "system_boundaries_figure": null,
       "product_system": "Biofuels",
       "functional_unit_unit": "L",
@@ -20,14 +43,14 @@
       "functional_unit": "L of biofuel",
       "region": "Brazil",
       "sharing_principle": "Equal per Capita",
-      "reason_sharing_principle": "deacwadsc",
-      "created_at": "2025-09-12 23:14:27"
+      "reason_sharing_principle": "sim",
+      "created_at": "2025-10-31 16:30:42"
     }
   ],
   "preferences": {
     "theme": "Claro",
     "notifications": true
   },
-  "selected_project_index": 0,
-  "last_update": "2025-09-12 23:19:40"
+  "selected_project_index": 1,
+  "last_update": "2025-10-31 16:31:19"
 }
