@@ -306,6 +306,156 @@ def generate_project_pdf(project_data, project_name):
     story.append(Paragraph(f"<b>Current LCI Status:</b> {lci_status}", normal_style))
     story.append(Spacer(1, 12))
     
+    # If LCI data is complete, add detailed information
+    if has_lci_data:
+        lci_data = project_data.get('lci_data', {})
+        db_name = project_data.get('lci_database_name', 'N/A')
+        upload_date = project_data.get('lci_upload_date', 'N/A')
+        
+        story.append(Paragraph("LCI Database Details", heading_style))
+        
+        # LCI summary metrics
+        activities_count = len(lci_data.get('activities', []))
+        exchanges_count = len(lci_data.get('exchanges', []))
+        biosphere_count = sum(1 for e in lci_data.get('exchanges', []) 
+                             if e.get('type') in ['emission', 'resource'])
+        technosphere_count = sum(1 for e in lci_data.get('exchanges', []) 
+                                if e.get('type') == 'input')
+        
+        lci_summary = [
+            ['Database Name', db_name],
+            ['Upload Date', upload_date],
+            ['Total Activities', str(activities_count)],
+            ['Total Exchanges', str(exchanges_count)],
+            ['Biosphere Flows', str(biosphere_count)],
+            ['Technosphere Inputs', str(technosphere_count)],
+            ['Data Source', project_data.get('lci_data_source', 'User upload')]
+        ]
+        
+        # Add metadata if available
+        metadata = lci_data.get('metadata', {})
+        if metadata.get('location'):
+            lci_summary.append(['Location', metadata.get('location')])
+        if metadata.get('time_period'):
+            lci_summary.append(['Time Period', metadata.get('time_period')])
+        
+        lci_table = Table(lci_summary, colWidths=[2*inch, 4*inch])
+        lci_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        
+        story.append(lci_table)
+        story.append(Spacer(1, 15))
+        
+        # Activities summary (top 10)
+        activities = lci_data.get('activities', [])
+        if activities:
+            story.append(Paragraph("Main Process Activities (Top 10)", heading_style))
+            
+            activities_data = [['Code', 'Name', 'Location', 'Unit']]
+            for i, activity in enumerate(activities[:10]):  # Limit to top 10
+                activities_data.append([
+                    str(activity.get('code', 'N/A'))[:20],  # Limit length
+                    str(activity.get('name', 'N/A'))[:40],
+                    str(activity.get('location', 'N/A'))[:15],
+                    str(activity.get('unit', 'N/A'))[:10]
+                ])
+            
+            activities_table = Table(activities_data, colWidths=[1.2*inch, 2.5*inch, 1.2*inch, 0.9*inch])
+            activities_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.darkgreen),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            
+            story.append(activities_table)
+            
+            if len(activities) > 10:
+                story.append(Paragraph(f"<i>... and {len(activities) - 10} more activities</i>", normal_style))
+            
+            story.append(Spacer(1, 15))
+    
+    # Impact Assessment Results Section
+    story.append(Paragraph("Environmental Impact Assessment Results", heading_style))
+    
+    # Check if impact assessment was performed
+    if project_data.get('impact_results'):
+        impact_results = project_data.get('impact_results', {})
+        
+        story.append(Paragraph("<b>Impact Assessment Status:</b> Completed", normal_style))
+        story.append(Spacer(1, 10))
+        
+        # Create table for impact results
+        impact_data = [['Impact Category', 'Value', 'Unit']]
+        
+        for category, data in impact_results.items():
+            impact_data.append([
+                f"{data.get('icon', '')} {category}",
+                f"{data.get('value', 0):,.3f}",
+                data.get('unit', 'N/A')
+            ])
+        
+        impact_table = Table(impact_data, colWidths=[2.5*inch, 2*inch, 1.5*inch])
+        impact_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (1, 1), (1, -1), 'RIGHT'),  # Right align values
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        story.append(impact_table)
+        story.append(Spacer(1, 15))
+        
+        # Interpretation guidance
+        story.append(Paragraph("Impact Interpretation Guide", heading_style))
+        
+        interpretation_text = """
+        <b>How to Interpret Results:</b><br/>
+        • <b>Climate Change (GWP):</b> Lower values indicate less contribution to global warming<br/>
+        • <b>Water Use:</b> Represents total water consumed throughout the lifecycle<br/>
+        • <b>Land Use:</b> Total land area occupied over time<br/>
+        • <b>Energy Demand:</b> Cumulative energy required (renewable + non-renewable)<br/>
+        • <b>Acidification:</b> Contribution to acid rain and soil acidification<br/>
+        • <b>Eutrophication:</b> Contribution to algal blooms and oxygen depletion in water bodies<br/>
+        <br/>
+        <b>Important Notes:</b><br/>
+        • Results are based on LCI data quality and completeness<br/>
+        • Consider uncertainty in input data when interpreting results<br/>
+        • Compare with industry benchmarks for context<br/>
+        """
+        
+        story.append(Paragraph(interpretation_text, normal_style))
+        story.append(Spacer(1, 15))
+        
+    else:
+        story.append(Paragraph("<b>Impact Assessment Status:</b> Not Performed", normal_style))
+        story.append(Paragraph("<i>Run impact assessment to calculate environmental impacts</i>", normal_style))
+        story.append(Spacer(1, 12))
+    
     # Timestamps
     story.append(Paragraph("Project Timeline", heading_style))
     timeline_info = [

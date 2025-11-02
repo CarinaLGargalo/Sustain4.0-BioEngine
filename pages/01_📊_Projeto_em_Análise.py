@@ -126,7 +126,7 @@ with col2:
 with col3:
     # Button to export project (only if there is a selected project)
     if st.session_state.get('current_project'):
-        if st.button("📄 Export", use_container_width=True):
+        if st.button("📄 Export Report", use_container_width=True):
             st.session_state.show_export = True
 
 with col4:
@@ -432,7 +432,7 @@ if selected_project:
                 st.markdown("---")
                 
                 # Action buttons
-                col_action1, col_action2, col_action3, col_action4 = st.columns([1, 1, 1, 1])
+                col_action1, col_action2, col_action3 = st.columns([1, 1, 1])
                 
                 with col_action1:
                     # Download original Excel file
@@ -490,9 +490,6 @@ if selected_project:
                         st.session_state.show_impact_assessment = True
                         st.rerun()
                 
-                with col_action4:
-                    if st.button("� Export Report", use_container_width=True, disabled=True):
-                        st.info("🚧 Report export functionality will be available soon!")
             
             # Impact Assessment Interface
                 if st.session_state.get('show_impact_assessment'):
@@ -650,6 +647,28 @@ if selected_project:
                                     
                                     st.session_state.impact_results = impact_results
                                     st.session_state.impact_calculated = True
+                                    
+                                    # Save impact results to project
+                                    selected_project['impact_results'] = impact_results
+                                    selected_project['impact_assessment_date'] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    selected_project['functional_unit_amount'] = fu_amount
+                                    
+                                    # Update in user_projects
+                                    for idx, proj in enumerate(st.session_state.user_projects[username]):
+                                        if proj.get('key_code') == selected_project.get('key_code'):
+                                            st.session_state.user_projects[username][idx] = selected_project
+                                            break
+                                    
+                                    # Save to file
+                                    user_data = {
+                                        'projects': st.session_state.user_projects[username],
+                                        'preferences': {
+                                            'theme': st.session_state.get('theme', 'light'),
+                                            'notifications': st.session_state.get('notifications', True)
+                                        },
+                                        'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    }
+                                    save_user_data(username, user_data)
                                     
                                     st.success("✅ Impact assessment completed successfully!")
                                     time.sleep(0.5)
