@@ -21,7 +21,14 @@
       "region": "Brazil",
       "sharing_principle": "Needs-Based",
       "reason_sharing_principle": "Não sei.",
-      "created_at": "2025-10-31 16:09:56"
+      "created_at": "2025-10-31 16:09:56",
+      "lci_database_name": null,
+      "lci_data": null,
+      "lci_excel_file": null,
+      "lci_excel_filename": null,
+      "lci_data_source": "user_upload",
+      "lci_complete": false,
+      "lci_upload_date": null
     },
     {
       "name": "Amandão",
@@ -342,6 +349,5 @@
     "theme": "Claro",
     "notifications": true
   },
-  "selected_project_index": 2,
-  "last_update": "2025-10-31 19:18:50"
+  "last_update": "2025-11-02 18:14:27"
 }

@@ -770,84 +770,50 @@ if selected_project:
                 # Show level selection interface
                 st.markdown("#### 🎯 LCI Assessment Level")
                 
-                level_descriptions = {
-                    0: "**Level 0** - I don't know the process needed to reach the desired product",
-                    1: "**Level 1** - I know the process but don't have the flow data for each part",
-                    2: "**Level 2** - I know the process and have partial flow data",
-                    3: "**Level 3** - I know the process and have all necessary flow data"
-                }
+                st.markdown("**Select your current LCI knowledge level:**")
+                level_options = [
+                    "Level 0 - Don't know the process",
+                    "Level 1 - Know process, no data",
+                    "Level 2 - Know process, partial data", 
+                    "Level 3 - Know process, have all data"
+                ]
                 
-                # Show level descriptions in cards
-                for level, description in level_descriptions.items():
-                    if level == current_level:
-                        st.success(f"✅ Current Level: {description}")
-                    else:
-                        st.info(description)
+                selected_level_text = st.selectbox(
+                    "LCI Level",
+                    level_options,
+                    index=current_level,
+                    key=f"lci_level_selector_{project_key}"
+                )
                 
-                st.markdown("---")
+                # Extract the selected level number
+                selected_level = int(selected_level_text.split()[1])
                 
-                # Level selector
-                col_level1, col_level2 = st.columns([2, 1])
+                # Update level if changed
+                if selected_level != current_level:
+                    st.session_state.user_lci_level[project_key] = selected_level
+                    st.rerun()
                 
-                with col_level1:
-                    st.markdown("**Select your current LCI knowledge level:**")
-                    level_options = [
-                        "Level 0 - Don't know the process",
-                        "Level 1 - Know process, no data",
-                        "Level 2 - Know process, partial data", 
-                        "Level 3 - Know process, have all data"
-                    ]
-                    
-                    selected_level_text = st.selectbox(
-                        "LCI Level",
-                        level_options,
-                        index=current_level,
-                        key=f"lci_level_selector_{project_key}"
-                    )
-                    
-                    # Extract the selected level number
-                    selected_level = int(selected_level_text.split()[1])
-                    
-                    # Update level if changed
-                    if selected_level != current_level:
-                        st.session_state.user_lci_level[project_key] = selected_level
+                st.markdown("")  # Spacing
+                
+                # Action button based on current level
+                if current_level == 0:
+                    if st.button("🔍 Identify your LCI Process", use_container_width=True, type="primary"):
+                        st.info("🚧 Process identification functionality will be available soon!")
+                        
+                elif current_level == 1:
+                    if st.button("📊 Go to LCI Data Generation", use_container_width=True, type="primary"):
+                        st.info("🚧 LCI data generation functionality will be available soon!")
+                        
+                elif current_level == 2:
+                    if st.button("📈 Go to Missing LCI Data Generation", use_container_width=True, type="primary"):
+                        st.info("🚧 Missing LCI data generation functionality will be available soon!")
+                        
+                elif current_level == 3:
+                    if st.button("➕ Add Your LCI Data", use_container_width=True, type="primary"):
+                        st.session_state.show_level_3_interface = True
                         st.rerun()
                 
-                with col_level2:
-                    st.markdown("**Current Status:**")
-                    if current_level == 0:
-                        st.error("🔍 Process Identification Needed")
-                    elif current_level == 1:
-                        st.warning("📊 Data Collection Needed")
-                    elif current_level == 2:
-                        st.warning("📈 Partial Data Available")
-                    else:
-                        st.success("✅ Ready for LCI Input")
-                
                 st.markdown("---")
-                
-                # Buttons based on current level
-                col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-                
-                with col_btn2:
-                    if current_level == 0:
-                        if st.button("🔍 Identify your LCI Process", use_container_width=True, type="primary"):
-                            st.info("🚧 Process identification functionality will be available soon!")
-                            
-                    elif current_level == 1:
-                        if st.button("📊 Go to LCI Data Generation", use_container_width=True, type="primary"):
-                            st.info("🚧 LCI data generation functionality will be available soon!")
-                            
-                    elif current_level == 2:
-                        if st.button("📈 Go to Missing LCI Data Generation", use_container_width=True, type="primary"):
-                            st.info("🚧 Missing LCI data generation functionality will be available soon!")
-                            
-                    elif current_level == 3:
-                        if st.button("➕ Add Your LCI Data", use_container_width=True, type="primary"):
-                            st.session_state.show_level_3_interface = True
-                            st.rerun()
-
-        st.markdown("---")
 
 # Edit form (if editing)
 if st.session_state.get('show_edit_form') and selected_project:
