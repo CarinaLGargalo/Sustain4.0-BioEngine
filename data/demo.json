@@ -23,33 +23,180 @@
       "reason_sharing_principle": "AsIM",
       "created_at": "2025-11-03 00:18:04",
       "brightway_project_name": "sustain40_demo",
-      "lci_database_name": null,
+      "lci_database_name": "lci_425789",
       "lci_reference_activity_code": "FERM_01",
       "lci_reference_activity_name": "Fermentation",
       "brightway_warnings": [
         "⚠️ Suspicious mass balance in 'Distillation': Input=1.20kg, Output=0.02kg (ratio: 0.02)",
         "⚠️ Suspicious mass balance in 'Distillation': Input=1.20kg, Output=0.02kg (ratio: 0.02)"
       ],
-      "lci_data": null,
-      "lci_excel_file": null,
-      "lci_excel_filename": null,
-      "lci_data_source": "user_upload",
-      "lci_complete": false,
-      "lci_upload_date": null,
-      "impact_results": {
-        "GWP": {
-          "value": 0.0,
-          "unit": "kg CO2-Eq",
-          "icon": "🌡️",
-          "label": "Climate Change (GWP 100a)",
-          "method": [
-            "IPCC 2013",
-            "climate change",
-            "global warming potential (GWP100)"
-          ]
+      "lci_data": {
+        "metadata": {
+          "Project Name": "Bioethanol from Sugarcane - Example",
+          "Functional Unit": "1 L",
+          "Location": "BR",
+          "Scale": "pilot",
+          "System Boundaries": "gate-to-gate"
+        },
+        "activities": [
+          {
+            "code": "FERM_01",
+            "name": "Fermentation",
+            "unit": "kg",
+            "location": "BR",
+            "reference_production": 1.0
+          },
+          {
+            "code": "DIST_01",
+            "name": "Distillation",
+            "unit": "L",
+            "location": "BR",
+            "reference_production": 1.0
+          }
+        ],
+        "exchanges": [
+          {
+            "activity_code": "FERM_01",
+            "type": "production",
+            "flow_name": "Fermented mass",
+            "amount": 1.0,
+            "unit": "kg",
+            "category": null
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Sugarcane juice",
+            "amount": 1.8,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.1
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Yeast",
+            "amount": 0.05,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.005
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Water",
+            "amount": 5.0,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.25
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "input",
+            "flow_name": "Electricity",
+            "amount": 2.5,
+            "unit": "kWh",
+            "category": "energy",
+            "uncertainty": 0.15
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "emission",
+            "flow_name": "CO2, biogenic",
+            "amount": 0.9,
+            "unit": "kg",
+            "category": "air",
+            "uncertainty": 0.05
+          },
+          {
+            "activity_code": "FERM_01",
+            "type": "emission",
+            "flow_name": "Wastewater",
+            "amount": 4.5,
+            "unit": "kg",
+            "category": "water",
+            "uncertainty": 0.3
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "production",
+            "flow_name": "Crude ethanol",
+            "amount": 1.0,
+            "unit": "L",
+            "category": null
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "input",
+            "flow_name": "Fermented mass",
+            "amount": 1.2,
+            "unit": "kg",
+            "category": "material",
+            "uncertainty": 0.08
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "input",
+            "flow_name": "Heat (steam)",
+            "amount": 15.0,
+            "unit": "MJ",
+            "category": "energy",
+            "uncertainty": 1.0
+          },
+          {
+            "activity_code": "DIST_01",
+            "type": "emission",
+            "flow_name": "Ethanol vapor",
+            "amount": 0.02,
+            "unit": "kg",
+            "category": "air",
+            "uncertainty": 0.003
+          }
+        ],
+        "flow_mapping": {
+          "CO2, biogenic": "Carbon dioxide, non-fossil",
+          "Wastewater": "Water, unspecified natural origin",
+          "Ethanol vapor": "Ethanol"
         }
       },
-      "impact_assessment_date": "2025-11-06 09:56:16",
+      "lci_excel_file": "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",
+      "lci_excel_filename": "Sustain40_LCI_Example (4).xlsx",
+      "lci_data_source": "user_upload",
+      "lci_complete": true,
+      "lci_upload_date": "2025-11-10 00:43:11",
+      "impact_results": {
+        "GWP": {
+          "value": 9.53,
+          "unit": "kg CO₂-eq",
+          "icon": "🌡️"
+        },
+        "Water Use": {
+          "value": 1.74,
+          "unit": "m³",
+          "icon": "💧"
+        },
+        "Land Use": {
+          "value": 3.9,
+          "unit": "m²·year",
+          "icon": "🌾"
+        },
+        "CED": {
+          "value": 60.32,
+          "unit": "MJ",
+          "icon": "⚡"
+        },
+        "Acidification": {
+          "value": 0.313,
+          "unit": "kg SO₂-eq",
+          "icon": "🧪"
+        },
+        "Eutrophication": {
+          "value": 0.159,
+          "unit": "kg PO₄-eq",
+          "icon": "🌊"
+        }
+      },
+      "impact_assessment_date": "2025-11-10 00:45:50",
       "functional_unit_amount": 1.0,
       "impact_activity_code": "FERM_01",
       "impact_activity_name": "Fermentation",
@@ -69,6 +216,5 @@
     "theme": "Claro",
     "notifications": true
   },
-  "selected_project_index": 0,
-  "last_update": "2025-11-10 00:31:13"
+  "last_update": "2025-11-10 00:45:50"
 }

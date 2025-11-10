@@ -968,12 +968,15 @@ if selected_project:
                                 )
                                 
                                 if uploaded_diagram:
-                                    # Display the uploaded image
-                                    st.image(
-                                        uploaded_diagram,
-                                        caption="Uploaded Process Network Diagram",
-                                        use_container_width=True
-                                    )
+                                    # Display the uploaded image in a smaller container
+                                    col_img_left, col_img_center, col_img_right = st.columns([1, 3, 1])
+                                    
+                                    with col_img_center:
+                                        st.image(
+                                            uploaded_diagram,
+                                            caption="Uploaded Process Network Diagram (click to zoom)",
+                                            use_container_width=True
+                                        )
                                     
                                     # Store image in session state for later use
                                     if 'uploaded_network_diagram' not in st.session_state:
@@ -981,6 +984,7 @@ if selected_project:
                                     
                                     st.session_state.uploaded_network_diagram[project_key] = uploaded_diagram.getvalue()
                                     st.success("✅ Diagram uploaded successfully!")
+                                    st.caption("💡 Tip: Click on the image to view it in full size")
                                 else:
                                     st.info("📤 Please upload an image file of your process network diagram")
                             
