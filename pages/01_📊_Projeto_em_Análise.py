@@ -950,27 +950,63 @@ if selected_project:
                         with tab_network:
                             st.markdown("#### Process Flow Diagram")
                             
-                            if len(importer.activities) > 0:
-                                try:
-                                    fig = generate_process_network_diagram(
-                                        importer.activities,
-                                        importer.exchanges
+                            # Option to choose between generated diagram or upload
+                            diagram_option = st.radio(
+                                "Choose diagram source:",
+                                ["Generate Automatically", "Upload Custom Image"],
+                                horizontal=True,
+                                key="diagram_option"
+                            )
+                            
+                            if diagram_option == "Upload Custom Image":
+                                st.markdown("---")
+                                uploaded_diagram = st.file_uploader(
+                                    "Upload your process network diagram",
+                                    type=['png', 'jpg', 'jpeg', 'svg'],
+                                    help="Upload an image of your process flow diagram",
+                                    key="network_diagram_uploader"
+                                )
+                                
+                                if uploaded_diagram:
+                                    # Display the uploaded image
+                                    st.image(
+                                        uploaded_diagram,
+                                        caption="Uploaded Process Network Diagram",
+                                        use_container_width=True
                                     )
-                                    if fig:
-                                        st.plotly_chart(fig, use_container_width=True)
-                                    else:
-                                        st.info("""
-                                        📦 **Network diagram requires networkx package**
-                                        
-                                        Install with: `pip install networkx`
-                                        
-                                        The diagram will show process connections and flows between activities.
-                                        """)
-                                except Exception as e:
-                                    st.warning(f"⚠️ Could not generate network diagram.\n\nDetails: {str(e)}")
-                                    st.info("Install networkx package to enable this feature: `pip install networkx`")
+                                    
+                                    # Store image in session state for later use
+                                    if 'uploaded_network_diagram' not in st.session_state:
+                                        st.session_state.uploaded_network_diagram = {}
+                                    
+                                    st.session_state.uploaded_network_diagram[project_key] = uploaded_diagram.getvalue()
+                                    st.success("✅ Diagram uploaded successfully!")
+                                else:
+                                    st.info("📤 Please upload an image file of your process network diagram")
+                            
                             else:
-                                st.info("No activities to display")
+                                # Generate automatically
+                                if len(importer.activities) > 0:
+                                    try:
+                                        fig = generate_process_network_diagram(
+                                            importer.activities,
+                                            importer.exchanges
+                                        )
+                                        if fig:
+                                            st.plotly_chart(fig, use_container_width=True)
+                                        else:
+                                            st.info("""
+                                            📦 **Network diagram requires networkx package**
+                                            
+                                            Install with: `pip install networkx`
+                                            
+                                            The diagram will show process connections and flows between activities.
+                                            """)
+                                    except Exception as e:
+                                        st.warning(f"⚠️ Could not generate network diagram.\n\nDetails: {str(e)}")
+                                        st.info("Install networkx package to enable this feature: `pip install networkx`")
+                                else:
+                                    st.info("No activities to display")
                         
                         # Step 4: Create database
                         st.markdown("---")
