@@ -1,9 +1,9 @@
-import streamlit as st
-import streamlit_authenticator as stauth
-import pandas as pd
+import streamlit as st  # type: ignore
+import streamlit_authenticator as stauth  # type: ignore
+import pandas as pd  # type: ignore
 import os
 import time
-import bcrypt
+import bcrypt  # type: ignore
 from pathlib import Path
 
 # Page configuration - MUST be the first Streamlit command
@@ -56,7 +56,7 @@ page_bg__img = """
 st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Importar funções do módulo utils
-from utils import (
+from utils import (  # type: ignore
     load_config,
     save_config,
     ensure_data_dir,
@@ -317,7 +317,7 @@ def login_page():
                         st.error("❌ Password must be at least 6 characters long!")
                     else:
                         # Add new user
-                        import bcrypt
+                        import bcrypt  # type: ignore
                         hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                         
                         # Atualizar configuração

@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st  # type: ignore
 
 # Page configuration (MUST be the first Streamlit command)
 st.set_page_config(
@@ -9,10 +9,10 @@ st.set_page_config(
 )
 
 # Import other libraries after page configuration
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
+import plotly.express as px  # type: ignore
+import plotly.graph_objects as go  # type: ignore
 import sys
 import os
 
@@ -59,8 +59,8 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Import functions from utilities module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import check_authentication, generate_project_pdf, save_user_data
-from brightway_integration import (
+from utils import check_authentication, generate_project_pdf, save_user_data  # type: ignore
+from brightway_integration import (  # type: ignore
     SustainExcelImporter, 
     generate_excel_template, 
     get_example_lci_file,
@@ -704,7 +704,7 @@ if selected_project:
                         with st.expander("📈 **Detailed Impact Breakdown**", expanded=False):
                             
                             # Create DataFrame for visualization
-                            import pandas as pd
+                            import pandas as pd  # type: ignore
                             
                             df_impacts = pd.DataFrame([
                                 {
@@ -725,7 +725,7 @@ if selected_project:
                             # Bar chart
                             st.markdown("#### Comparative Visualization")
                             
-                            import plotly.graph_objects as go
+                            import plotly.graph_objects as go  # type: ignore
                             
                             # Normalize values for comparison (0-100 scale)
                             if len(df_impacts) > 1:
@@ -783,7 +783,7 @@ if selected_project:
                         
                         with col_act2:
                             # Export results as CSV
-                            import pandas as pd
+                            import pandas as pd  # type: ignore
                             df_export = pd.DataFrame([
                                 {
                                     'Impact Category': category,

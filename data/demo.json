@@ -166,37 +166,12 @@
       "lci_upload_date": "2025-11-10 00:43:11",
       "impact_results": {
         "GWP": {
-          "value": 9.53,
+          "value": 9.23,
           "unit": "kg CO₂-eq",
           "icon": "🌡️"
-        },
-        "Water Use": {
-          "value": 1.74,
-          "unit": "m³",
-          "icon": "💧"
-        },
-        "Land Use": {
-          "value": 3.9,
-          "unit": "m²·year",
-          "icon": "🌾"
-        },
-        "CED": {
-          "value": 60.32,
-          "unit": "MJ",
-          "icon": "⚡"
-        },
-        "Acidification": {
-          "value": 0.313,
-          "unit": "kg SO₂-eq",
-          "icon": "🧪"
-        },
-        "Eutrophication": {
-          "value": 0.159,
-          "unit": "kg PO₄-eq",
-          "icon": "🌊"
         }
       },
-      "impact_assessment_date": "2025-11-10 00:45:50",
+      "impact_assessment_date": "2026-03-05 14:43:43",
       "functional_unit_amount": 1.0,
       "impact_activity_code": "FERM_01",
       "impact_activity_name": "Fermentation",
@@ -216,5 +191,6 @@
     "theme": "Claro",
     "notifications": true
   },
-  "last_update": "2025-11-10 00:45:50"
+  "last_update": "2026-03-05 14:43:58",
+  "auto_saved": true
 }

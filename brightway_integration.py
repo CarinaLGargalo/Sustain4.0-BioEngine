@@ -3,18 +3,18 @@ Brightway 2.5 Integration for Sustain 4.0 BioEngine
 Handles LCI data import, validation, and database creation
 """
 
-import pandas as pd
+import pandas as pd  # type: ignore
 from typing import Dict, List, Tuple, Optional
-import streamlit as st
+import streamlit as st  # type: ignore
 from io import BytesIO
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill
-import plotly.graph_objects as go
+from openpyxl import Workbook  # type: ignore
+from openpyxl.styles import Font, PatternFill  # type: ignore
+import plotly.graph_objects as go  # type: ignore
 
 # Brightway imports - optional, only needed when actually creating databases
 try:
-    import bw2data as bd
-    import bw2io as bi
+    import bw2data as bd  # type: ignore
+    import bw2io as bi  # type: ignore
     BRIGHTWAY_AVAILABLE = True
 except ImportError:
     BRIGHTWAY_AVAILABLE = False

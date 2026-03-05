@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st  # type: ignore
 
 # Page configuration (MUST be the first Streamlit command)
 st.set_page_config(
@@ -9,9 +9,9 @@ st.set_page_config(
 )
 
 # Import other libraries after page configuration
-import yaml
-from yaml.loader import SafeLoader
-import pandas as pd
+import yaml  # type: ignore
+from yaml.loader import SafeLoader  # type: ignore
+import pandas as pd  # type: ignore
 import json
 import os
 from pathlib import Path
@@ -41,7 +41,7 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Add parent directory to path to import functions
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import save_user_data
+from utils import save_user_data  # type: ignore
 
 # Authentication verification
 if not st.session_state.get('authenticated', False):
@@ -49,7 +49,7 @@ if not st.session_state.get('authenticated', False):
     st.stop()
 
 # Import additional functions
-from utils import load_config, save_config
+from utils import load_config, save_config  # type: ignore
 
 st.header("Settings")
 

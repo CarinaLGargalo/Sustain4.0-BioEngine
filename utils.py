@@ -1,16 +1,16 @@
-import streamlit as st
-import pandas as pd
+import streamlit as st  # type: ignore
+import pandas as pd  # type: ignore
 import json
 import os
-import yaml
-from yaml.loader import SafeLoader
+import yaml  # type: ignore
+from yaml.loader import SafeLoader  # type: ignore
 from pathlib import Path
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.pagesizes import letter, A4  # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image  # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # type: ignore
+from reportlab.lib.units import inch  # type: ignore
+from reportlab.lib import colors  # type: ignore
+from reportlab.lib.enums import TA_CENTER, TA_LEFT  # type: ignore
 import base64
 import io
 
@@ -365,10 +365,10 @@ def generate_project_pdf(project_data, project_name):
             activities_data = [['Code', 'Name', 'Location', 'Unit']]
             for i, activity in enumerate(activities[:10]):  # Limit to top 10
                 activities_data.append([
-                    str(activity.get('code', 'N/A'))[:20],  # Limit length
-                    str(activity.get('name', 'N/A'))[:40],
-                    str(activity.get('location', 'N/A'))[:15],
-                    str(activity.get('unit', 'N/A'))[:10]
+                    str(activity.get('code', 'N/A'))[:20],  # type: ignore  # Limit length
+                    str(activity.get('name', 'N/A'))[:40],  # type: ignore
+                    str(activity.get('location', 'N/A'))[:15],  # type: ignore
+                    str(activity.get('unit', 'N/A'))[:10]  # type: ignore
                 ])
             
             activities_table = Table(activities_data, colWidths=[1.2*inch, 2.5*inch, 1.2*inch, 0.9*inch])
