@@ -2,8 +2,6 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
 import os
-import streamlit as st
-import pandas as pd
 import time
 import bcrypt
 from pathlib import Path
