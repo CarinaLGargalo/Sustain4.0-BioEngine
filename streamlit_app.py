@@ -1,9 +1,6 @@
 import streamlit as st  # type: ignore
-import streamlit_authenticator as stauth  # type: ignore
 import pandas as pd  # type: ignore
-import os
 import time
-import bcrypt  # type: ignore
 from pathlib import Path
 
 # Page configuration - MUST be the first Streamlit command
@@ -57,33 +54,20 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Importar funções do módulo utils
 from utils import (  # type: ignore
-    load_config,
-    save_config,
     ensure_data_dir,
+    ensure_path_within_data,
     save_user_data,
-    load_user_data,
     check_authentication,
     init_session_state,
-    load_user_data_on_login,
-    auto_save_user_data
-)
-
-# Initialize configuration and authenticator
-config = load_config()
-
-# Create the authenticator
-authenticator = stauth.Authenticate(
-    credentials=config['credentials'],
-    cookie_name=config['cookie']['name'], 
-    key=config['cookie']['key'],
-    cookie_expiry_days=config['cookie']['expiry_days']
+    auto_save_user_data,
+    clear_app_session_state,
 )
 
 # Inicializar session state
 init_session_state()
 
 def login_page():
-    """Displays the login page with streamlit-authenticator"""
+    """Displays the OIDC login page."""
     
     # Custom CSS to improve the login page visual
     st.markdown("""
@@ -251,94 +235,10 @@ def login_page():
             unsafe_allow_html=True
         )
         
-        # Create tabs for Login and Registration
-        tab1, tab2 = st.tabs(["Login", "Register"])
-        
-        with tab1:
-            # Widget de login do streamlit-authenticator
-            authenticator.login(location='main')
-        
-        if st.session_state["authentication_status"] == False:
-            st.error('❌ Incorrect username/password')
-        elif st.session_state["authentication_status"]:
-            st.session_state.authenticated = True
-            st.session_state.username = st.session_state["username"]
-            st.session_state.user_name = st.session_state["name"]
-            st.session_state.login_time = pd.Timestamp.now()
-            st.session_state.balloons_shown = False  # Reset flag to allow showing balloons again
-            
-            # Load user data
-            load_user_data_on_login(st.session_state["username"])
-            st.rerun()  # Reload page to show main content
-        
-        # Demo button (quick access) with improved style
-        st.markdown("---")
-        st.markdown("### 🎯 Quick Access")
-        if st.button("👁️ Demo - Explore Platform", use_container_width=True):
-            st.session_state.authenticated = True
-            st.session_state.username = "demo"
-            st.session_state.user_name = "Demo User"
-            st.session_state.login_time = pd.Timestamp.now()
-            st.session_state.balloons_shown = False  # Resetar a flag para permitir mostrar os balões
-            
-            # Load demo user data
-            load_user_data_on_login("demo")
-            
-            st.rerun()  # Recarrega a página para mostrar o conteúdo principal
-    
-        with tab2:
-            st.markdown("### Create new account")
-            
-            # Formulário customizado de registro
-            with st.form("register_form"):
-                col_reg1, col_reg2 = st.columns(2)
-                
-                with col_reg1:
-                    new_name = st.text_input("👤 Full Name:", placeholder="Enter your full name")
-                    new_username = st.text_input("🔑 Username:", placeholder="Choose a unique username")
-                
-                with col_reg2:
-                    new_email = st.text_input("📧 Email:", placeholder="Enter your email")
-                    
-                new_password = st.text_input("🔒 Password:", type="password", placeholder="Enter a secure password")
-                new_password_repeat = st.text_input("🔒 Confirm Password:", type="password", placeholder="Enter the password again")
-            
-                submit_button = st.form_submit_button("🎉 Create Account", type="primary", use_container_width=True)
-                
-                if submit_button:
-                    # Validações
-                    if not all([new_name, new_username, new_email, new_password, new_password_repeat]):
-                        st.error("❌ Please fill in all fields!")
-                    elif new_password != new_password_repeat:
-                        st.error("❌ Passwords don't match!")
-                    elif new_username in config['credentials']['usernames']:
-                        st.error("❌ Username already exists! Choose another.")
-                    elif len(new_password) < 6:
-                        st.error("❌ Password must be at least 6 characters long!")
-                    else:
-                        # Add new user
-                        import bcrypt  # type: ignore
-                        hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                        
-                        # Atualizar configuração
-                        config['credentials']['usernames'][new_username] = {
-                            'name': new_name,
-                            'email': new_email,
-                            'password': hashed_password
-                        }
-                        
-                        # Save to file
-                        save_config(config)
-                        
-                        st.success("✅ Account created successfully!")
-                        st.info("🔄 Now you can login in the Login tab!")
-
-                        # Clear cache to reload configuration
-                        st.cache_data.clear()
-                        
-                        import time
-                        time.sleep(2)
-                        st.rerun()
+        st.markdown("### Login")
+        st.info("Use your Google account to access Sustain4.0 BioEngine.")
+        if st.button("🔐 Continue with Google", type="primary", use_container_width=True):
+            st.login("google")
 
         # Close main container
         st.markdown('</div>', unsafe_allow_html=True)
@@ -425,10 +325,10 @@ with colt3:
     # Logout button
     if st.button("Logout", use_container_width=True):
         # Save user data before logging out
-        username = st.session_state.username
+        current_user_id = st.session_state.get('user_id')
         
         # Retrieve existing projects
-        user_projects = st.session_state.user_projects.get(username, [])
+        user_projects = st.session_state.user_projects.get(current_user_id, [])
         
         # Save user data before logging out
         user_data = {
@@ -442,16 +342,12 @@ with colt3:
         }
         
         # Save data
-        save_user_data(username, user_data)
-        
-        # Clear session
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-            
-        # Reinitialize session state with default values
+        if current_user_id:
+            save_user_data(current_user_id, user_data)
+
+        st.logout()
+        clear_app_session_state()
         init_session_state()
-        
-        # Reload the page
         st.rerun()
 
 st.markdown('---')
@@ -589,22 +485,27 @@ if st.session_state.show_project_form:
                 key_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
                 
                 # Create new project in session
-                username = st.session_state.username
+                current_user_id = st.session_state.get('user_id')
+                if not current_user_id:
+                    st.error("Could not determine authenticated user ID.")
+                    st.stop()
                 
                 # Initialize user's project list if it doesn't exist yet
-                if username not in st.session_state.user_projects:
-                    st.session_state.user_projects[username] = []
+                if current_user_id not in st.session_state.user_projects:
+                    st.session_state.user_projects[current_user_id] = []
                 
                 # Save figure if uploaded
                 figure_path = None
                 if system_boundaries_figure is not None:
                     # Create directory to save figures if it doesn't exist
-                    figures_dir = Path("data/figures")
-                    figures_dir.mkdir(exist_ok=True)
+                    figures_dir = ensure_path_within_data(ensure_data_dir() / "figures")
+                    figures_dir.mkdir(parents=True, exist_ok=True)
                     
                     # Save file with unique name
-                    figure_filename = f"{username}_{key_code}_{system_boundaries_figure.name}"
-                    figure_path = figures_dir / figure_filename
+                    original_name = Path(system_boundaries_figure.name).name
+                    safe_name = original_name.replace("..", "").replace("/", "_").replace("\\", "_")
+                    figure_filename = f"{current_user_id}_{key_code}_{safe_name}"
+                    figure_path = ensure_path_within_data(figures_dir / figure_filename)
                     
                     with open(figure_path, "wb") as f:
                         
@@ -638,18 +539,18 @@ if st.session_state.show_project_form:
                     'created_at': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 
-                st.session_state.user_projects[username].append(new_project)
+                st.session_state.user_projects[current_user_id].append(new_project)
                 
                 # Save user data
                 user_data = {
-                    'projects': st.session_state.user_projects[username],
+                    'projects': st.session_state.user_projects[current_user_id],
                     'preferences': {
                         'theme': st.session_state.theme,
                         'notifications': st.session_state.notifications
                     },
                     'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
-                save_user_data(username, user_data)
+                save_user_data(current_user_id, user_data)
                 
                 st.success(f"Project '{project_name}' created successfully! Code: {key_code}")
                 st.session_state.show_project_form = False  # Close form after saving
@@ -662,8 +563,8 @@ if not st.session_state.show_project_form:
 
     with main_col1:
         st.subheader("My Projects")
-        username = st.session_state.username
-        user_projects = st.session_state.user_projects.get(username, [])
+        current_user_id = st.session_state.get('user_id')
+        user_projects = st.session_state.user_projects.get(current_user_id, [])
 
         # Initialize state for selected project
         if 'selected_project' not in st.session_state:
@@ -794,7 +695,7 @@ if not st.session_state.show_project_form:
                         
                         # Save user data before navigating
                         user_data = {
-                            'projects': st.session_state.user_projects[username],
+                            'projects': st.session_state.user_projects[current_user_id],
                             'preferences': {
                                 'theme': st.session_state.theme,
                                 'notifications': st.session_state.notifications
@@ -802,7 +703,7 @@ if not st.session_state.show_project_form:
                             'selected_project_index': idx,
                             'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                         }
-                        save_user_data(username, user_data)
+                        save_user_data(current_user_id, user_data)
                         
                         # Redirect to analysis page
                         st.switch_page("pages/01_📊_Projeto_em_Análise.py")
@@ -825,7 +726,7 @@ if not st.session_state.show_project_form:
                     with confirm_col1:
                         if st.button("🗑️ Yes, Delete", type="primary", use_container_width=True, key=f"confirm_delete_{idx}"):
                             # Remove project
-                            st.session_state.user_projects[username].pop(idx)
+                            st.session_state.user_projects[current_user_id].pop(idx)
                             
                             # Adjust selected project index if necessary
                             if st.session_state.selected_project == idx:
@@ -835,14 +736,14 @@ if not st.session_state.show_project_form:
                             
                             # Save data
                             user_data = {
-                                'projects': st.session_state.user_projects[username],
+                                'projects': st.session_state.user_projects[current_user_id],
                                 'preferences': {
                                     'theme': st.session_state.theme,
                                     'notifications': st.session_state.notifications
                                 },
                                 'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                             }
-                            save_user_data(username, user_data)
+                            save_user_data(current_user_id, user_data)
                             
                             st.success("Project deleted successfully!")
                             st.session_state.show_delete_confirm = False
@@ -903,7 +804,7 @@ if not st.session_state.show_project_form:
                     # Open project on analysis page
                     st.session_state.current_project = selected_project
                     user_data = {
-                        'projects': st.session_state.user_projects[username],
+                        'projects': st.session_state.user_projects[current_user_id],
                         'preferences': {
                             'theme': st.session_state.theme,
                             'notifications': st.session_state.notifications
@@ -911,5 +812,5 @@ if not st.session_state.show_project_form:
                         'selected_project_index': selected_idx,
                         'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                     }
-                    save_user_data(username, user_data)
+                    save_user_data(current_user_id, user_data)
                     st.switch_page("pages/01_📊_Projeto_em_Análise.py")

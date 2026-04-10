@@ -8,7 +8,7 @@ Uma plataforma integrada de análise de sustentabilidade ambiental, fornecendo u
 
 ## Características
 
-- 🔒 Sistema de autenticação de usuários
+- 🔒 Autenticação com Google OIDC (`st.login`, `st.user`, `st.logout`)
 - 📊 Visualização de dados ambientais
 - 📁 Gestão de projetos com persistência de dados
 - ⚙️ Configurações personalizadas por usuário
@@ -25,5 +25,28 @@ O sistema implementa persistência de dados para as seguintes informações:
 
 Os dados são armazenados nos seguintes locais:
 
-- `config.yaml` - Configurações globais e informações de usuário
-- `data/[username].json` - Dados específicos por usuário (projetos, preferências, etc.)
+- `config.yaml` - Somente configurações não sensíveis do aplicativo
+- `data/app_data.db` - Banco SQLite com perfis e projetos por `user_id` (OIDC `sub`)
+
+## Configuração de Autenticação (Google OIDC)
+
+As credenciais e segredos de autenticação não devem ficar em `config.yaml`.
+
+1. Crie/edite `.streamlit/secrets.toml` com os valores de autenticação.
+2. Preencha `client_id`, `client_secret` e `cookie_secret`.
+3. Ajuste `redirect_uri` para o ambiente (local ou produção).
+
+Exemplo:
+
+```toml
+[auth]
+redirect_uri = "http://localhost:8501/oauth2callback"
+cookie_secret = "<long-random-secret>"
+
+[auth.google]
+client_id = "<google-client-id>"
+client_secret = "<google-client-secret>"
+server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration"
+```
+
+`.streamlit/secrets.toml` está ignorado no versionamento por segurança.

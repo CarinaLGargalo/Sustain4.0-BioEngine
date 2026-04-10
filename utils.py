@@ -1,10 +1,10 @@
 import streamlit as st  # type: ignore
 import pandas as pd  # type: ignore
 import json
-import os
 import yaml  # type: ignore
 from yaml.loader import SafeLoader  # type: ignore
 from pathlib import Path
+import sqlite3
 from reportlab.lib.pagesizes import letter, A4  # type: ignore
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image  # type: ignore
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # type: ignore
@@ -14,48 +14,216 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT  # type: ignore
 import base64
 import io
 
-# Function to check authentication
-def check_authentication():
-    """Checks if user is authenticated"""
-    return st.session_state.get('authenticated', False)
+APP_SESSION_KEYS = {
+    'authenticated',
+    'user_id',
+    'username',
+    'user_name',
+    'user_email',
+    'user_projects',
+    'selected_project',
+    'current_project',
+    'show_project_form',
+    'deleting_project',
+    'show_delete_confirm',
+    'last_save_time',
+    'login_time',
+    'balloons_shown',
+    '_loaded_user_id',
+}
 
-# Create data directory if it doesn't exist
+
 def ensure_data_dir():
-    """Ensures that the data directory exists"""
-    data_dir = Path("./data")
-    if not data_dir.exists():
-        data_dir.mkdir()
+    """Ensures that the data directory exists and returns its resolved path."""
+    data_dir = Path("./data").resolve()
+    data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
 
-# Function to save user data
-def save_user_data(username, data):
-    """Saves user data to a JSON file"""
+
+def ensure_path_within_data(path: Path):
+    """Validates that a path resolves inside ./data."""
     data_dir = ensure_data_dir()
-    user_file = data_dir / f"{username}.json"
-    
-    with open(user_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f, default=str, ensure_ascii=False, indent=2)
-        
-# Function to load user data
-def load_user_data(username):
-    """Loads user data from a JSON file"""
-    data_dir = ensure_data_dir()
-    user_file = data_dir / f"{username}.json"
-    
-    if user_file.exists():
-        try:
-            with open(user_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            st.error(f"Error loading user data: {e}")
-            return {}
-    else:
-        return {}
+    resolved = path.resolve()
+    if resolved != data_dir and data_dir not in resolved.parents:
+        raise ValueError("Path traversal attempt blocked")
+    return resolved
+
+
+def get_database_path():
+    """Returns the SQLite database path inside ./data."""
+    return ensure_path_within_data(ensure_data_dir() / "app_data.db")
+
+
+def init_persistence():
+    """Creates required SQLite tables for user profiles and projects."""
+    db_path = get_database_path()
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                user_id TEXT PRIMARY KEY,
+                email TEXT,
+                display_name TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_state (
+                user_id TEXT PRIMARY KEY,
+                projects_json TEXT NOT NULL,
+                preferences_json TEXT NOT NULL,
+                selected_project_index INTEGER,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES user_profiles(user_id)
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_user_profile(user_id, email, display_name):
+    """Creates or updates the authenticated user's profile metadata."""
+    init_persistence()
+    now = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = sqlite3.connect(get_database_path())
+    try:
+        conn.execute(
+            """
+            INSERT INTO user_profiles(user_id, email, display_name, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                email=excluded.email,
+                display_name=excluded.display_name,
+                updated_at=excluded.updated_at
+            """,
+            (user_id, email, display_name, now, now),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def save_user_data(user_id, data):
+    """Saves user projects and preferences to SQLite by immutable user_id."""
+    init_persistence()
+    projects = data.get('projects', [])
+    preferences = data.get('preferences', {})
+    selected_project_index = data.get('selected_project_index')
+    updated_at = data.get('last_update', pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+    conn = sqlite3.connect(get_database_path())
+    try:
+        conn.execute(
+            """
+            INSERT INTO user_state(user_id, projects_json, preferences_json, selected_project_index, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                projects_json=excluded.projects_json,
+                preferences_json=excluded.preferences_json,
+                selected_project_index=excluded.selected_project_index,
+                updated_at=excluded.updated_at
+            """,
+            (
+                user_id,
+                json.dumps(projects, default=str, ensure_ascii=False),
+                json.dumps(preferences, default=str, ensure_ascii=False),
+                selected_project_index,
+                updated_at,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_user_data(user_id):
+    """Loads user projects and preferences from SQLite by immutable user_id."""
+    init_persistence()
+    conn = sqlite3.connect(get_database_path())
+    try:
+        row = conn.execute(
+            """
+            SELECT projects_json, preferences_json, selected_project_index, updated_at
+            FROM user_state
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if not row:
+        return {'projects': [], 'preferences': {}}
+
+    projects_json, preferences_json, selected_project_index, updated_at = row
+    return {
+        'projects': json.loads(projects_json or '[]'),
+        'preferences': json.loads(preferences_json or '{}'),
+        'selected_project_index': selected_project_index,
+        'last_update': updated_at,
+    }
+
+
+def _oidc_claim(user_obj, key):
+    """Reads a claim from Streamlit's user object across attribute/dict styles."""
+    value = getattr(user_obj, key, None)
+    if value:
+        return value
+    try:
+        if isinstance(user_obj, dict):
+            return user_obj.get(key)
+        return user_obj[key]
+    except Exception:
+        return None
+
+
+def sync_session_with_authenticated_user():
+    """Syncs Streamlit session state from OIDC identity and persisted data."""
+    user = getattr(st, 'user', None)
+    is_logged_in = bool(user and getattr(user, 'is_logged_in', False))
+    if not is_logged_in:
+        st.session_state.authenticated = False
+        return False
+
+    user_id = _oidc_claim(user, 'sub')
+    if not user_id:
+        st.error("Authenticated user is missing OIDC subject (sub).")
+        st.session_state.authenticated = False
+        return False
+
+    display_name = _oidc_claim(user, 'name') or _oidc_claim(user, 'given_name') or "User"
+    email = _oidc_claim(user, 'email') or ""
+
+    st.session_state.authenticated = True
+    st.session_state.user_id = str(user_id)
+    st.session_state.user_name = display_name
+    st.session_state.user_email = email
+    st.session_state.username = email or str(user_id)
+
+    upsert_user_profile(st.session_state.user_id, email, display_name)
+
+    if st.session_state.get('_loaded_user_id') != st.session_state.user_id:
+        load_user_data_on_login(st.session_state.user_id)
+        st.session_state._loaded_user_id = st.session_state.user_id
+        st.session_state.login_time = pd.Timestamp.now()
+        st.session_state.balloons_shown = False
+    return True
+
+
+def check_authentication():
+    """Checks if current session is authenticated through OIDC."""
+    return sync_session_with_authenticated_user()
 
 # Function to load configuration
 @st.cache_data
 def load_config():
-    """Loads user configuration from YAML file"""
+    """Loads non-secret application configuration from YAML file."""
     try:
         with open('config.yaml') as file:
             config = yaml.load(file, Loader=SafeLoader)
@@ -63,53 +231,63 @@ def load_config():
     except FileNotFoundError:
         # Default configuration if file doesn't exist
         return {
-            'credentials': {'usernames': {}},
-            'cookie': {
-                'expiry_days': 30,
-                'key': 'sustain40_bioengine_key',
-                'name': 'sustain40_cookie'
-            },
-            'preauthorized': {'emails': []}
+            'theme': 'Sistema',
+            'default_chart_type': 'Bars',
+            'color_palette': 'Sustainability',
+            'data_density': 500,
+            'cache_duration': '1 hour',
+            'units': 'Metric',
+            'backup_frequency': 'Weekly',
+            'backup_location': './backups',
+            'notifications_enabled': True,
+            'notification_types': ['Critical alerts'],
+            'email_notifications': False,
+            'email_frequency': 'Daily summary',
         }
 
 # Function to save configuration
 def save_config(config):
-    """Saves user configuration to YAML file"""
+    """Saves non-secret application configuration to YAML file."""
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
 
 # Initialize session state
 def init_session_state():
     """Initializes session state variables"""
+    init_persistence()
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
+    if 'user_id' not in st.session_state:
+        st.session_state.user_id = ""
     if 'username' not in st.session_state:
         st.session_state.username = ""
     if 'user_name' not in st.session_state:
         st.session_state.user_name = ""
+    if 'user_email' not in st.session_state:
+        st.session_state.user_email = ""
     if 'notifications' not in st.session_state:
         st.session_state.notifications = True
     if 'theme' not in st.session_state:
         st.session_state.theme = "Light"
     if 'user_projects' not in st.session_state:
-        st.session_state.user_projects = {}  # Dictionary to store projects by username
+        st.session_state.user_projects = {}  # Dictionary to store projects by immutable user_id
     if 'last_save_time' not in st.session_state:
         st.session_state.last_save_time = pd.Timestamp.now()
 
 # Function to load user data when logging in
-def load_user_data_on_login(username):
+def load_user_data_on_login(user_id):
     """Loads user data and updates session_state"""
-    user_data = load_user_data(username)
+    user_data = load_user_data(user_id)
     
     # Load projects
     if 'projects' in user_data:
-        st.session_state.user_projects[username] = user_data['projects']
+        st.session_state.user_projects[user_id] = user_data['projects']
     
     # Load previously selected project (if it exists)
     if 'selected_project_index' in user_data:
-        projects = st.session_state.user_projects.get(username, [])
+        projects = st.session_state.user_projects.get(user_id, [])
         selected_idx = user_data['selected_project_index']
-        if 0 <= selected_idx < len(projects):
+        if selected_idx is not None and 0 <= selected_idx < len(projects):
             st.session_state.selected_project = selected_idx
             st.session_state.current_project = projects[selected_idx]
     
@@ -128,7 +306,8 @@ def load_user_data_on_login(username):
 # Function to auto-save user data
 def auto_save_user_data():
     """Auto-save user data every 5 minutes"""
-    if not st.session_state.get('username'):
+    user_id = st.session_state.get('user_id')
+    if not user_id:
         return
         
     current_time = pd.Timestamp.now()
@@ -136,10 +315,8 @@ def auto_save_user_data():
     
     # Check if at least 5 minutes have passed since the last save
     if (current_time - last_save).total_seconds() >= 300:  # 300 seconds = 5 minutes
-        username = st.session_state.username
-        
         # Retrieve existing projects
-        user_projects = st.session_state.user_projects.get(username, [])
+        user_projects = st.session_state.user_projects.get(user_id, [])
         
         # Data to be saved
         user_data = {
@@ -153,8 +330,15 @@ def auto_save_user_data():
         }
         
         # Save user data
-        save_user_data(username, user_data)
+        save_user_data(user_id, user_data)
         st.session_state.last_save_time = current_time
+
+
+def clear_app_session_state():
+    """Clears app-owned session keys while preserving Streamlit internals."""
+    for key in list(st.session_state.keys()):
+        if key in APP_SESSION_KEYS or key.startswith('form_') or key.startswith('edit_'):
+            del st.session_state[key]
 
 # Function to generate PDF report for project
 def generate_project_pdf(project_data, project_name):

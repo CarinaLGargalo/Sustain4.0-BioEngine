@@ -1,25 +1,13 @@
-cookie:
-  expiry_days: 30
-  key: sustain40_bioengine_key
-  name: sustain40_cookie
-credentials:
-  usernames:
-    admin:
-      email: admin@bioengine.com
-      name: Administrador
-      password: $2b$12$M3cvnwOJjrVwMRGdb1BCLe7HN0/nx4p.DU7G7D8nqxRnv6gQKokNm
-    analista:
-      email: analista@bioengine.com
-      name: Analista
-      password: $2b$12$hTgy1j3M0jQVFb/ifSOo0O9v4VR6bcH.5qX79WJhTvFBfo8ZuF4va
-    demo:
-      email: demo@bioengine.com
-      name: Demo User
-      password: $2b$12$.afwGV05MWlrgtDV2hJmT.bF4GesA6gub5fiW9H5atL3CWcucYVbS
-    pesquisador:
-      email: pesquisador@bioengine.com
-      name: Pesquisador
-      password: $2b$12$qYAd9TDMBeBm8OjGPoMC8OBJ.dvgZj5R/qCcDIrUP6x4J1cVHl2/a
-preauthorized:
-  emails:
-  - admin@bioengine.com
+theme: Sistema
+default_chart_type: Bars
+color_palette: Sustainability
+data_density: 500
+cache_duration: 1 hour
+units: Metric
+backup_frequency: Weekly
+backup_location: ./backups
+notifications_enabled: true
+notification_types:
+  - Critical alerts
+email_notifications: false
+email_frequency: Daily summary

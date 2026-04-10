@@ -9,12 +9,8 @@ st.set_page_config(
 )
 
 # Import other libraries after page configuration
-import yaml  # type: ignore
-from yaml.loader import SafeLoader  # type: ignore
 import pandas as pd  # type: ignore
-import json
 import os
-from pathlib import Path
 import sys
 
 # Custom background with 30% opacity
@@ -41,52 +37,28 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Add parent directory to path to import functions
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import save_user_data  # type: ignore
+from utils import check_authentication, load_config, save_config, save_user_data  # type: ignore
 
 # Authentication verification
-if not st.session_state.get('authenticated', False):
+if not check_authentication():
     st.info("🔐Please login on the main page.")
     st.stop()
-
-# Import additional functions
-from utils import load_config, save_config  # type: ignore
 
 st.header("Settings")
 
 # Load current configuration
 config = load_config()
+current_user_id = st.session_state.get('user_id')
+user_projects = st.session_state.user_projects.get(current_user_id, [])
 
 # Create tabs to organize settings
 tab1, tab2, tab3, tab4 = st.tabs(["🔒 Account", "📊 Visualization", "🔧 System", "📱 Notifications"])
 
 with tab1:
-    st.subheader("Account Settings")
-    
-    # Display current user information (if available)
-    if 'username' in st.session_state:
-        st.info(f"Current user: {st.session_state['username']}")
-        
-        # Option to change password
-        with st.expander("Change password"):
-            current_password = st.text_input("Current password", type="password")
-            new_password = st.text_input("New password", type="password")
-            confirm_password = st.text_input("Confirm new password", type="password")
-            
-            if st.button("Update password"):
-                if new_password != confirm_password:
-                    st.error("Passwords don't match.")
-                elif len(new_password) < 6:
-                    st.error("Password must be at least 6 characters long.")
-                else:
-                    # Here you would implement the logic to verify current password
-                    # and update to new password in config
-                    st.success("Password changed successfully!")
-
-    # Section for managing users (administrators only)
-    with st.expander("Manage Users (Admin)"):
-        st.warning("This section is only available for administrators.")
-        # Here you could add a check if the user is admin
-        # And then show user management options
+    st.subheader("Account")
+    st.info(f"Name: {st.session_state.get('user_name', 'User')}")
+    st.info(f"Email: {st.session_state.get('user_email', 'N/A')}")
+    st.caption("Authentication is managed via Google OIDC (Streamlit st.login/st.logout).")
 
 with tab2:
     st.subheader("Configurações de Visualização")
@@ -149,9 +121,9 @@ with tab3:
     # Backup settings
     st.subheader("Data Backup")
     backup_frequency = st.selectbox(
-        "Frequência de backup automático",
-        options=["Desativado", "Diário", "Semanal", "Mensal"],
-        index=["Desativado", "Diário", "Semanal", "Mensal"].index(config.get('backup_frequency', 'Semanal'))
+        "Automatic backup frequency",
+        options=["Disabled", "Daily", "Weekly", "Monthly"],
+        index=["Disabled", "Daily", "Weekly", "Monthly"].index(config.get('backup_frequency', 'Weekly')) if config.get('backup_frequency', 'Weekly') in ["Disabled", "Daily", "Weekly", "Monthly"] else 2
     )
     
     backup_location = st.text_input(
@@ -238,12 +210,7 @@ if st.button("Save all settings", type="primary"):
         st.error(f"Error saving settings: {e}")
         
     # Save user preferences to their own file
-    if st.session_state.get('username'):
-        username = st.session_state.username
-        
-        # Retrieve existing projects (if any)
-        user_projects = st.session_state.user_projects.get(username, [])
-        
+    if current_user_id:
         # Build user data object
         user_data = {
             'projects': user_projects,
@@ -258,42 +225,31 @@ if st.button("Save all settings", type="primary"):
             'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Salvar dados do usuário
         try:
-            save_user_data(username, user_data)
-            st.success("Configurações pessoais salvas com sucesso!")
+            save_user_data(current_user_id, user_data)
+            st.success("Personal settings saved successfully!")
         except Exception as e:
-            st.error(f"Erro ao salvar configurações pessoais: {e}")
+            st.error(f"Error saving personal settings: {e}")
 
-# Opção para restaurar padrões
 if st.button("Restaurar configurações padrão"):
     if st.checkbox("Confirmar restauração de configurações padrão"):
-        # Definir valores padrão
         default_config = {
             'theme': 'Sistema',
-            'default_chart_type': 'Barras',
-            'color_palette': 'Sustentabilidade',
+            'default_chart_type': 'Bars',
+            'color_palette': 'Sustainability',
             'data_density': 500,
-            'cache_duration': '1 hora',
-            'units': 'Métrico',
-            'backup_frequency': 'Semanal',
+            'cache_duration': '1 hour',
+            'units': 'Metric',
+            'backup_frequency': 'Weekly',
             'backup_location': './backups',
             'notifications_enabled': True,
-            'notification_types': ["Alertas críticos"],
-            'email_notifications': False
+            'notification_types': ["Critical alerts"],
+            'email_notifications': False,
+            'email_frequency': 'Daily summary'
         }
-        
-        # Manter credenciais e configurações de cookie
-        if 'credentials' in config:
-            default_config['credentials'] = config['credentials']
-        if 'cookie' in config:
-            default_config['cookie'] = config['cookie']
-        if 'preauthorized' in config:
-            default_config['preauthorized'] = config['preauthorized']
-        
-        # Salvar
+
         try:
             save_config(default_config)
-            st.experimental_rerun()  # Recarregar a página
+            st.rerun()
         except Exception as e:
             st.error(f"Erro ao restaurar configurações: {e}")

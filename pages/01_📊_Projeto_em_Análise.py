@@ -78,13 +78,13 @@ if 'show_impact_assessment' not in st.session_state:
     st.session_state.show_impact_assessment = False
 
 # Authentication verification
-if not st.session_state.get('authenticated', False):
+if not check_authentication():
     st.info("🔐 Please login on the main page.")
     st.stop()
 
 # Check if there are available projects
-username = st.session_state.username
-user_projects = st.session_state.user_projects.get(username, [])
+current_user_id = st.session_state.user_id
+user_projects = st.session_state.user_projects.get(current_user_id, [])
 
 if not user_projects:
     st.warning("You don't have any projects yet. Create a project on the main page.")
@@ -464,21 +464,21 @@ if selected_project:
                         selected_project['lci_excel_filename'] = None
                         
                         # Update in user_projects
-                        for idx, proj in enumerate(st.session_state.user_projects[username]):
+                        for idx, proj in enumerate(st.session_state.user_projects[current_user_id]):
                             if proj.get('key_code') == selected_project.get('key_code'):
-                                st.session_state.user_projects[username][idx] = selected_project
+                                st.session_state.user_projects[current_user_id][idx] = selected_project
                                 break
                         
                         # Save to file
                         user_data = {
-                            'projects': st.session_state.user_projects[username],
+                            'projects': st.session_state.user_projects[current_user_id],
                             'preferences': {
                                 'theme': st.session_state.get('theme', 'light'),
                                 'notifications': st.session_state.get('notifications', True)
                             },
                             'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                         }
-                        save_user_data(username, user_data)
+                        save_user_data(current_user_id, user_data)
                         
                         st.success("🔄 LCI data cleared! You can now upload new data.")
                         import time
@@ -654,21 +654,21 @@ if selected_project:
                                     selected_project['functional_unit_amount'] = fu_amount
                                     
                                     # Update in user_projects
-                                    for idx, proj in enumerate(st.session_state.user_projects[username]):
+                                    for idx, proj in enumerate(st.session_state.user_projects[current_user_id]):
                                         if proj.get('key_code') == selected_project.get('key_code'):
-                                            st.session_state.user_projects[username][idx] = selected_project
+                                            st.session_state.user_projects[current_user_id][idx] = selected_project
                                             break
                                     
                                     # Save to file
                                     user_data = {
-                                        'projects': st.session_state.user_projects[username],
+                                        'projects': st.session_state.user_projects[current_user_id],
                                         'preferences': {
                                             'theme': st.session_state.get('theme', 'light'),
                                             'notifications': st.session_state.get('notifications', True)
                                         },
                                         'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                                     }
-                                    save_user_data(username, user_data)
+                                    save_user_data(current_user_id, user_data)
                                     
                                     st.success("✅ Impact assessment completed successfully!")
                                     time.sleep(0.5)
@@ -1069,21 +1069,21 @@ if selected_project:
                                         selected_project['lci_upload_date'] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                                         
                                         # Update project in user_projects
-                                        for idx, proj in enumerate(st.session_state.user_projects[username]):
+                                        for idx, proj in enumerate(st.session_state.user_projects[current_user_id]):
                                             if proj.get('key_code') == selected_project.get('key_code'):
-                                                st.session_state.user_projects[username][idx] = selected_project
+                                                st.session_state.user_projects[current_user_id][idx] = selected_project
                                                 break
                                         
                                         # Save to file
                                         user_data = {
-                                            'projects': st.session_state.user_projects[username],
+                                            'projects': st.session_state.user_projects[current_user_id],
                                             'preferences': {
                                                 'theme': st.session_state.get('theme', 'light'),
                                                 'notifications': st.session_state.get('notifications', True)
                                             },
                                             'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
                                         }
-                                        save_user_data(username, user_data)
+                                        save_user_data(current_user_id, user_data)
                                         
                                         st.success(f"✅ LCI data saved successfully!")
                                         
@@ -1350,7 +1350,7 @@ if st.session_state.get('show_edit_form') and selected_project:
     # Process form submission
     if submit_edit:
         # Find the index of current project in the user's project list
-        user_projects = st.session_state.user_projects.get(username, [])
+        user_projects = st.session_state.user_projects.get(current_user_id, [])
         project_index = None
         for idx, project in enumerate(user_projects):
             if project.get('key_code') == selected_project.get('key_code'):
@@ -1359,7 +1359,7 @@ if st.session_state.get('show_edit_form') and selected_project:
         
         if project_index is not None:
             # Update project
-            st.session_state.user_projects[username][project_index] = {
+            st.session_state.user_projects[current_user_id][project_index] = {
                 'name': edit_name,
                 'key_code': selected_project.get('key_code', '000000'),  # Keep existing code
                 'goal_statement': edit_goal,
@@ -1386,18 +1386,18 @@ if st.session_state.get('show_edit_form') and selected_project:
             }
             
             # Also update current project in session
-            st.session_state.current_project = st.session_state.user_projects[username][project_index]
+            st.session_state.current_project = st.session_state.user_projects[current_user_id][project_index]
             
             # Save data
             user_data = {
-                'projects': st.session_state.user_projects[username],
+                'projects': st.session_state.user_projects[current_user_id],
                 'preferences': {
                     'theme': st.session_state.theme,
                     'notifications': st.session_state.notifications
                 },
                 'last_update': pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            save_user_data(username, user_data)
+            save_user_data(current_user_id, user_data)
             
             st.success("✅ Project updated successfully!")
             st.session_state.show_edit_form = False
@@ -1408,3 +1408,4 @@ if st.session_state.get('show_edit_form') and selected_project:
     if cancel_edit:
         st.session_state.show_edit_form = False
         st.rerun()
+
