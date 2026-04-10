@@ -1,6 +1,5 @@
 import streamlit as st  # type: ignore
 import pandas as pd  # type: ignore
-import time
 from pathlib import Path
 
 # Page configuration - MUST be the first Streamlit command
@@ -81,7 +80,7 @@ def login_page():
     # Custom CSS to improve the login page visual
     st.markdown("""
     <style>
-    
+
     /* Main title */
     .main-title {
         background: linear-gradient(135deg, #2c3e50, #27ae60, #3498db);
@@ -94,93 +93,7 @@ def login_page():
         margin-bottom: 30px !important;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
-    
-    /* Tab styles */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0px;
-        background: rgba(255,255,255,0.8);
-        border-radius: 15px;
-        padding: 5px;
-        margin-bottom: 30px;
-        display: flex;
-        width: 100%;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 12px;
-        padding: 15px 25px;
-        background: transparent;
-        border: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        flex: 1;
-        text-align: center;
-        width: 50%;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #3498db, #2ecc71) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-    
-    /* Forms */
-    .stForm {
-        background: rgba(248, 249, 250, 0.9);
-        border-radius: 15px;
-        padding: 25px;
-        border: 1px solid rgba(222, 226, 230, 0.5);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    /* Inputs */
-    .stTextInput > div > div > input,
-    .stSelectbox > div > div > div,
-    .stTextArea > div > div > textarea {
-        border-radius: 10px !important;
-        border: 2px solid #e9ecef !important;
-        padding: 12px 15px !important;
-        transition: all 0.3s ease !important;
-        background: rgba(255,255,255,0.9) !important;
-    }
-    
-    .stTextInput > div > div > input:focus,
-    .stSelectbox > div > div > div:focus,
-    .stTextArea > div > div > textarea:focus {
-        border-color: #3498db !important;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        padding: 12px 25px !important;
-        border: none !important;
-        transition: all 0.3s ease !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-    }
-    
-    /* Primary button */
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #3498db, #2ecc71) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-    }
-    
-    .stButton > button[kind="primary"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
-    }
-    
-    /* Demo button */
-    .stButton > button:not([kind="primary"]) {
-        background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3) !important;
-    }
-    
+
     /* Messages */
     .stSuccess {
         background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
@@ -190,7 +103,7 @@ def login_page():
         border: none !important;
         box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3) !important;
     }
-    
+
     .stError {
         background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
         color: white !important;
@@ -199,7 +112,7 @@ def login_page():
         border: none !important;
         box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
     }
-    
+
     .stInfo {
         background: linear-gradient(135deg, #3498db, #2980b9) !important;
         color: white !important;
@@ -208,7 +121,7 @@ def login_page():
         border: none !important;
         box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
     }
-    
+
     /* Platform description */
     .platform-description {
         background: rgba(255, 255, 255, 0.9);
@@ -221,7 +134,7 @@ def login_page():
         line-height: 1.6;
         color: #2c3e50;
     }
-    
+
     /* Icons and emojis */
     .icon-enhancement {
         font-size: 1.2em;
@@ -282,29 +195,6 @@ if not check_authentication():
     st.stop()  # Stop execution here if not authenticated
 
 
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
-
-# Main application content
 
 # Main application content
 
