@@ -73,9 +73,9 @@ def login_page():
             auth_config = st.secrets.get("auth", {})
             required_keys = ("redirect_uri", "cookie_secret", "client_id", "client_secret", "server_metadata_url")
             missing_keys = [key for key in required_keys if not auth_config.get(key)]
-            return missing_keys == []
+            return missing_keys == [], missing_keys
         except Exception:
-            return False
+            return False, ["redirect_uri", "cookie_secret", "client_id", "client_secret", "server_metadata_url"]
     
     # Custom CSS to improve the login page visual
     st.markdown("""
@@ -159,11 +159,15 @@ def login_page():
         
         st.markdown("### Login")
         st.info("Use your Google account to access Sustain4.0 BioEngine.")
-        if not _oidc_auth_configured():
-            st.error("Missing OIDC configuration. Add the five keys under [auth] in Streamlit Cloud Secrets or .streamlit/secrets.toml: redirect_uri, cookie_secret, client_id, client_secret, and server_metadata_url.")
-            st.stop()
+        auth_ready, missing_keys = _oidc_auth_configured()
+        if not auth_ready:
+            st.warning(
+                "OIDC is not configured yet. Copy .streamlit/secrets.toml.example to .streamlit/secrets.toml "
+                "and fill in these keys under [auth]: " + ", ".join(missing_keys) + "."
+            )
+            st.caption("Without these values, Google login is disabled in this environment.")
 
-        if st.button("🔐 Continue with Google", type="primary", use_container_width=True):
+        if st.button("🔐 Continue with Google", type="primary", use_container_width=True, disabled=not auth_ready):
             st.login()
 
         # Close main container
