@@ -32,9 +32,10 @@ Os dados são armazenados nos seguintes locais:
 
 As credenciais e segredos de autenticação não devem ficar em `config.yaml`.
 
-1. Crie/edite `.streamlit/secrets.toml` com os valores de autenticação.
+1. Copie `.streamlit/secrets.toml.example` para `.streamlit/secrets.toml`.
 2. Preencha `client_id`, `client_secret` e `cookie_secret`.
 3. Ajuste `redirect_uri` para o ambiente (local ou produção).
+4. Mantenha `server_metadata_url` apontando para o provedor OIDC.
 
 Exemplo:
 
