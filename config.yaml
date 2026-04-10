@@ -1,13 +1,13 @@
-theme: Sistema
-default_chart_type: Bars
-color_palette: Sustainability
-data_density: 500
-cache_duration: 1 hour
-units: Metric
 backup_frequency: Weekly
 backup_location: ./backups
-notifications_enabled: true
-notification_types:
-  - Critical alerts
-email_notifications: false
+cache_duration: 1 hour
+color_palette: Sustainability
+data_density: 500
+default_chart_type: Bars
 email_frequency: Daily summary
+email_notifications: false
+notification_types:
+- Critical alerts
+notifications_enabled: true
+theme: Sistema
+units: Metric

@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 data/app_data.db
+.streamlit/client_secret.json
