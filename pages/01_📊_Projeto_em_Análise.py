@@ -59,7 +59,7 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Import functions from utilities module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import check_authentication, generate_project_pdf, save_user_data  # type: ignore
+from utils import check_authentication, generate_project_pdf, init_session_state, save_user_data  # type: ignore
 from brightway_integration import (  # type: ignore
     SustainExcelImporter, 
     generate_excel_template, 
@@ -77,6 +77,8 @@ if 'show_level_3_interface' not in st.session_state:
 if 'show_impact_assessment' not in st.session_state:
     st.session_state.show_impact_assessment = False
 
+init_session_state()
+
 # Authentication verification
 if not check_authentication():
     st.info("🔐 Please login on the main page.")
@@ -93,10 +95,16 @@ if not user_projects:
 # Check if there is a pre-selected project from the main page
 selected_project = None
 selected_project_name = None
+current_project = st.session_state.get('current_project')
 
-if st.session_state.get('current_project'):
+if current_project and current_project not in user_projects:
+    st.session_state.current_project = None
+    st.session_state.selected_project = None
+    current_project = None
+
+if current_project:
     # Use project selected from main page
-    selected_project = st.session_state.current_project
+    selected_project = current_project
     selected_project_name = selected_project['name']
 else:
     # Select project manually

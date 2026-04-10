@@ -37,7 +37,9 @@ st.markdown(page_bg__img, unsafe_allow_html=True)
 
 # Add parent directory to path to import functions
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import check_authentication, load_config, save_config, save_user_data  # type: ignore
+from utils import check_authentication, init_session_state, load_config, save_config, save_user_data  # type: ignore
+
+init_session_state()
 
 # Authentication verification
 if not check_authentication():

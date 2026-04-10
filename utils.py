@@ -183,28 +183,49 @@ def _oidc_claim(user_obj, key):
         return None
 
 
+def _clear_project_selection_state():
+    """Drops cached project selection state that may belong to a different user."""
+    for key in ('selected_project', 'current_project'):
+        if key in st.session_state:
+            st.session_state[key] = None
+
+
 def sync_session_with_authenticated_user():
     """Syncs Streamlit session state from OIDC identity and persisted data."""
+    init_session_state()
     user = getattr(st, 'user', None)
     is_logged_in = bool(user and getattr(user, 'is_logged_in', False))
     if not is_logged_in:
         st.session_state.authenticated = False
+        st.session_state.user_id = ""
+        st.session_state._loaded_user_id = None
+        _clear_project_selection_state()
         return False
 
     user_id = _oidc_claim(user, 'sub')
     if not user_id:
         st.error("Authenticated user is missing OIDC subject (sub).")
         st.session_state.authenticated = False
+        st.session_state.user_id = ""
+        st.session_state._loaded_user_id = None
+        _clear_project_selection_state()
         return False
 
     display_name = _oidc_claim(user, 'name') or _oidc_claim(user, 'given_name') or "User"
     email = _oidc_claim(user, 'email') or ""
+
+    previous_user_id = st.session_state.get('user_id', "")
+    user_changed = previous_user_id and previous_user_id != str(user_id)
 
     st.session_state.authenticated = True
     st.session_state.user_id = str(user_id)
     st.session_state.user_name = display_name
     st.session_state.user_email = email
     st.session_state.username = email or str(user_id)
+
+    if user_changed:
+        _clear_project_selection_state()
+        st.session_state._loaded_user_id = None
 
     upsert_user_profile(st.session_state.user_id, email, display_name)
 
@@ -277,13 +298,18 @@ def init_session_state():
 # Function to load user data when logging in
 def load_user_data_on_login(user_id):
     """Loads user data and updates session_state"""
+    init_session_state()
     user_data = load_user_data(user_id)
     
     # Load projects
     if 'projects' in user_data:
         st.session_state.user_projects[user_id] = user_data['projects']
+    else:
+        st.session_state.user_projects.setdefault(user_id, [])
     
     # Load previously selected project (if it exists)
+    st.session_state.selected_project = None
+    st.session_state.current_project = None
     if 'selected_project_index' in user_data:
         projects = st.session_state.user_projects.get(user_id, [])
         selected_idx = user_data['selected_project_index']
