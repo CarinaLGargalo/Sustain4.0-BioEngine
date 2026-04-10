@@ -68,6 +68,14 @@ init_session_state()
 
 def login_page():
     """Displays the OIDC login page."""
+
+    def _oidc_auth_configured():
+        try:
+            auth_config = st.secrets.get("auth", {})
+            required_keys = ("redirect_uri", "cookie_secret", "client_id", "client_secret", "server_metadata_url")
+            return all(auth_config.get(key) for key in required_keys)
+        except Exception:
+            return False
     
     # Custom CSS to improve the login page visual
     st.markdown("""
@@ -237,8 +245,12 @@ def login_page():
         
         st.markdown("### Login")
         st.info("Use your Google account to access Sustain4.0 BioEngine.")
+        if not _oidc_auth_configured():
+            st.error("Missing OIDC configuration. Set [auth] in .streamlit/secrets.toml with redirect_uri, cookie_secret, client_id, client_secret, and server_metadata_url.")
+            st.stop()
+
         if st.button("🔐 Continue with Google", type="primary", use_container_width=True):
-            st.login("google")
+            st.login()
 
         # Close main container
         st.markdown('</div>', unsafe_allow_html=True)

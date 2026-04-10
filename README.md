@@ -42,8 +42,6 @@ Exemplo:
 [auth]
 redirect_uri = "http://localhost:8501/oauth2callback"
 cookie_secret = "<long-random-secret>"
-
-[auth.google]
 client_id = "<google-client-id>"
 client_secret = "<google-client-secret>"
 server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration"
